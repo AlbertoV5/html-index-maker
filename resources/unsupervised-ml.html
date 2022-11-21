@@ -1,0 +1,1942 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-11-03 Thu 17:10 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Unsupervised Machine Learning</title>
+<meta name="author" content="Alberto Valdez" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="https://albertovaldez5.gitlab.io/org-template/resources/theme/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://albertovaldez5.gitlab.io/org-template/resources/theme/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://albertovaldez5.gitlab.io/org-template/resources/theme/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://albertovaldez5.gitlab.io/org-template/resources/theme/js/readtheorg.js"></script>
+<link rel="shortcut icon" href="https://albertovaldez5.gitlab.io/org-template/resources/theme/favicon.ico">
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href=""> UP </a>
+ |
+ <a accesskey="H" href="https://albertovaldez5.gitlab.io/data-analytics-notes/"> HOME </a>
+</div><div id="content" class="content">
+<h1 class="title">Unsupervised Machine Learning</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#unsupervised-machine-learning">1. Unsupervised Machine Learning</a>
+<ul>
+<li><a href="#clustering">1.1. Clustering</a></li>
+</ul>
+</li>
+<li><a href="#data-preparation">2. Data preparation</a>
+<ul>
+<li><a href="#transformation-example">2.1. Transformation Example</a></li>
+<li><a href="#data-transformation-example-2">2.2. Data Transformation Example 2</a></li>
+</ul>
+</li>
+<li><a href="#k-means-algorithm">3. K-Means Algorithm</a>
+<ul>
+<li><a href="#the-elbow-curve">3.1. The Elbow Curve</a></li>
+</ul>
+</li>
+<li><a href="#k-cluster-example">4. K-Cluster Example</a>
+<ul>
+<li><a href="#load-the-data">4.1. Load the Data</a></li>
+<li><a href="#convert-time-to-time-delta">4.2. Convert time to Time Delta</a></li>
+<li><a href="#clean-the-data">4.3. Clean the data</a></li>
+<li><a href="#creating-a-training-set">4.4. Creating a Training Set</a></li>
+<li><a href="#chose-number-of-clusters-and-predict">4.5. Chose Number of Clusters and Predict</a></li>
+<li><a href="#visualize-the-results">4.6. Visualize the Results</a></li>
+<li><a href="#organize-the-results">4.7. Organize the Results</a></li>
+</ul>
+</li>
+<li><a href="#principal-component-analysis">5. Principal Component Analysis</a></li>
+<li><a href="#example-of-pca">6. Example of PCA</a>
+<ul>
+<li><a href="#load-the-data">6.1. Load the Data</a></li>
+<li><a href="#standarize-scale-the-data">6.2. Standarize / Scale the data</a></li>
+<li><a href="#use-the-pca">6.3. Use the PCA</a></li>
+<li><a href="#k-means-clustering">6.4. K-means clustering</a></li>
+<li><a href="#visualize-the-results">6.5. Visualize the Results</a></li>
+</ul>
+</li>
+<li><a href="#pca-example-2">7. PCA Example 2</a>
+<ul>
+<li><a href="#clean-the-data">7.1. Clean the data</a></li>
+<li><a href="#applying-pca">7.2. Applying PCA</a></li>
+<li><a href="#visualize-pca">7.3. Visualize PCA</a></li>
+<li><a href="#visualize-elbow-curve">7.4. Visualize Elbow Curve</a></li>
+<li><a href="#select-amount-of-clusters-and-build-model">7.5. Select Amount of Clusters and build Model</a></li>
+<li><a href="#visualize-the-results">7.6. Visualize the Results</a></li>
+<li><a href="#display-summary-statistics">7.7. Display summary statistics</a></li>
+</ul>
+</li>
+<li><a href="#hierarchical-clustering">8. Hierarchical Clustering</a>
+<ul>
+<li><a href="#dendograms">8.1. Dendograms</a></li>
+</ul>
+</li>
+<li><a href="#hierarchical-cluster-example">9. Hierarchical Cluster Example</a>
+<ul>
+<li><a href="#imports">9.1. Imports</a></li>
+<li><a href="#load-and-normalize-the-data">9.2. Load and Normalize the Data</a></li>
+<li><a href="#create-the-dendogram">9.3. Create the Dendogram</a></li>
+<li><a href="#remap-observations-into-clusters">9.4. Remap Observations into Clusters</a></li>
+<li><a href="#run-the-dendogram-again">9.5. Run the Dendogram Again</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-unsupervised-machine-learning" class="outline-2">
+<h2 id="unsupervised-machine-learning"><span class="section-number-2">1.</span> Unsupervised Machine Learning</h2>
+<div class="outline-text-2" id="text-unsupervised-machine-learning">
+<p>
+Unsupervised ML allows us to find hidden patterns in our data to get observations to help us make decisions or change our perspective on the data.
+</p>
+
+<p>
+The main difference against Supervised Learning is that there is no target variable. We will build labels from the patterns that arise by clustering information, so we will focus on the <b>features</b> and we will work on them.
+</p>
+
+<p>
+Unsupervised learning requires more human work and as it is an iteractive process.
+</p>
+
+<ul class="org-ul">
+<li>Some use cases are grouping unlabeled data into distinct clusters.</li>
+
+<li>Detecting unusual data points in a dataset (anomaly detection).</li>
+
+<li>Reducing large dataset into smaller datasets while preserving most of the useful information (dimensionality reduction.)</li>
+</ul>
+</div>
+
+<div id="outline-container-clustering" class="outline-3">
+<h3 id="clustering"><span class="section-number-3">1.1.</span> Clustering</h3>
+<div class="outline-text-3" id="text-clustering">
+<p>
+We can use clustering to group patterns into different clusters.
+</p>
+
+<p>
+Anomaly detection is when we use clustering to identify datapoints that may be suspicious (like credit card fraudulent transactions).
+</p>
+
+<p>
+When doing dimensionality reduction, we reduce N number of features into a handful of features or a single one. This allows us to generate labels that we can use to feed to the Supervised Learning models.
+</p>
+
+<p>
+A very popular example is customer segmentation, which allows companies to detect habits and references and build data on top of that to create predictions. For example, personalized movies suggestions in Netflix, Amazon, etc.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-data-preparation" class="outline-2">
+<h2 id="data-preparation"><span class="section-number-2">2.</span> Data preparation</h2>
+<div class="outline-text-2" id="text-data-preparation">
+<p>
+Data preparation is the process of converting the data of whichever nature to numbers, for example dates to time measurements or labels into integers.
+</p>
+
+<p>
+We will convert the text data from the dataset to integer labels.
+</p>
+
+<div class="src-name" id="orga9b91f8">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #569CD6;">import</span> <span style="color: #4EC9B0;">pandas </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> pd</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> pathlib </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> </span><span style="color: #4EC9B0;">Path</span>
+
+
+<span style="color: #9CDCFE;">file_path</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">Path</span>(<span style="color: #CE9178;">'../resources/iris.csv'</span>)
+<span style="color: #9CDCFE;">df</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #ded492;">read_csv</span>(file_path)
+<span style="color: #C586C0;">print</span>(df.<span style="color: #ded492;">head</span>(<span style="color: #BBCCAA;">5</span>))
+</pre>
+</div>
+
+<pre class="example" id="orgb27e831">
+   sepal_length  sepal_width  petal_length  petal_width        class
+0           5.1          3.5           1.4          0.2  Iris-setosa
+1           4.9          3.0           1.4          0.2  Iris-setosa
+2           4.7          3.2           1.3          0.2  Iris-setosa
+3           4.6          3.1           1.5          0.2  Iris-setosa
+4           5.0          3.6           1.4          0.2  Iris-setosa
+</pre>
+
+
+<div class="src-name" id="orgc4771d1">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">class_dict</span> <span style="color: #e0e0e0;">=</span> {<span style="color: #CE9178;">'Iris-setosa'</span>: <span style="color: #BBCCAA;">0</span>, <span style="color: #CE9178;">'Iris-versicolor'</span>: <span style="color: #BBCCAA;">1</span>, <span style="color: #CE9178;">'Iris-virginica'</span>: <span style="color: #BBCCAA;">2</span>}
+<span style="color: #9CDCFE;">df2</span> <span style="color: #e0e0e0;">=</span> df.<span style="color: #ded492;">replace</span>({<span style="color: #CE9178;">'class'</span>: class_dict})
+<span style="color: #C586C0;">print</span>(df2.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="orgf17856a">
+   sepal_length  sepal_width  ...  petal_width  class
+0           5.1          3.5  ...          0.2      0
+1           4.9          3.0  ...          0.2      0
+2           4.7          3.2  ...          0.2      0
+3           4.6          3.1  ...          0.2      0
+4           5.0          3.6  ...          0.2      0
+
+[5 rows x 5 columns]
+</pre>
+
+<div class="src-name" id="org2752af9">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">new_iris_df</span> <span style="color: #e0e0e0;">=</span> df.<span style="color: #ded492;">drop</span>([<span style="color: #CE9178;">"class"</span>], <span style="color: #9CDCFE;">axis</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">1</span>)
+<span style="color: #C586C0;">print</span>(new_iris_df.<span style="color: #ded492;">head</span>(<span style="color: #BBCCAA;">5</span>))
+</pre>
+</div>
+
+<pre class="example" id="org8589f0a">
+   sepal_length  sepal_width  petal_length  petal_width
+0           5.1          3.5           1.4          0.2
+1           4.9          3.0           1.4          0.2
+2           4.7          3.2           1.3          0.2
+3           4.6          3.1           1.5          0.2
+4           5.0          3.6           1.4          0.2
+</pre>
+</div>
+
+<div id="outline-container-transformation-example" class="outline-3">
+<h3 id="transformation-example"><span class="section-number-3">2.1.</span> Transformation Example</h3>
+<div class="outline-text-3" id="text-transformation-example">
+<p>
+You are given a dataset that contains historical data from purchases of an online store made by 200 customers. In this activity you will put in action your data preprocessing superpowers, also you&rsquo;ll add some new skills needed to start finding customers clusters.
+</p>
+
+<div class="src-name" id="orgf60dc3a">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #569CD6;">import</span> <span style="color: #4EC9B0;">pandas </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> pd</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> pathlib </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> </span><span style="color: #4EC9B0;">Path</span>
+
+<span style="color: #9CDCFE;">file_path</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">Path</span>(<span style="color: #CE9178;">'../resources/shopping_data.csv'</span>)
+<span style="color: #9CDCFE;">df_shopping</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #ded492;">read_csv</span>(file_path)
+<span style="color: #C586C0;">print</span>(df_shopping.<span style="color: #9CDCFE;">dtypes</span>)
+<span style="color: #C586C0;">print</span>(df_shopping[<span style="color: #CE9178;">'Previous Shopper'</span>].<span style="color: #ded492;">head</span>())
+<span style="color: #C586C0;">print</span>(df_shopping[<span style="color: #CE9178;">'Age'</span>].<span style="color: #ded492;">head</span>())
+<span style="color: #C586C0;">print</span>(df_shopping[<span style="color: #CE9178;">'Annual Income'</span>].<span style="color: #ded492;">head</span>())
+<span style="color: #C586C0;">print</span>(df_shopping[<span style="color: #CE9178;">'Spending Score (1-100)'</span>].<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="orga5ff047">
+CustomerID                 int64
+Previous Shopper          object
+Age                        int64
+Annual Income              int64
+Spending Score (1-100)     int64
+dtype: object
+0    Yes
+1    Yes
+2     No
+3     No
+4     No
+Name: Previous Shopper, dtype: object
+0    19
+1    21
+2    20
+3    23
+4    31
+Name: Age, dtype: int64
+0    15000
+1    15000
+2    16000
+3    16000
+4    17000
+Name: Annual Income, dtype: int64
+0    39
+1    81
+2     6
+3    77
+4    40
+Name: Spending Score (1-100), dtype: int64
+</pre>
+
+<p>
+We will drop the data that we don&rsquo;t want.
+</p>
+
+<div class="src-name" id="org5453fb7">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">df_shopping</span> <span style="color: #e0e0e0;">=</span> df_shopping.<span style="color: #ded492;">drop</span>([<span style="color: #CE9178;">'CustomerID'</span>], <span style="color: #9CDCFE;">axis</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">1</span>)
+<span style="color: #C586C0;">print</span>(df_shopping.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="org255f60a">
+  Previous Shopper  ...  Spending Score (1-100)
+0              Yes  ...                      39
+1              Yes  ...                      81
+2               No  ...                       6
+3               No  ...                      77
+4               No  ...                      40
+
+[5 rows x 4 columns]
+</pre>
+
+<p>
+We will drop the null values.
+</p>
+
+<div class="src-name" id="orgd89a3da">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #C586C0;">print</span>(df_shopping.<span style="color: #9CDCFE;">shape</span>)
+df_shopping.<span style="color: #ded492;">dropna</span>(<span style="color: #9CDCFE;">inplace</span><span style="color: #e0e0e0;">=</span><span style="color: #569CD6;">True</span>)
+<span style="color: #C586C0;">print</span>(df_shopping.<span style="color: #9CDCFE;">shape</span>)
+</pre>
+</div>
+
+<pre class="example" id="org1252202">
+(200, 4)
+(200, 4)
+</pre>
+
+<p>
+Now we replace the non-numeric data.
+</p>
+
+<div class="src-name" id="orgcf9099f">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #569CD6;">def</span> <span style="color: #ded492;">convert_status</span>(<span style="color: #9CDCFE;">status</span>):
+    <span style="color: #569CD6;">return</span> <span style="color: #BBCCAA;">1</span> <span style="color: #569CD6;">if</span> status <span style="color: #e0e0e0;">==</span> <span style="color: #CE9178;">'Yes'</span> <span style="color: #569CD6;">else</span> <span style="color: #BBCCAA;">0</span>
+df_shopping[<span style="color: #9CDCFE;">"Previous Shopper"</span>] <span style="color: #e0e0e0;">=</span> df_shopping[<span style="color: #CE9178;">"Previous Shopper"</span>].<span style="color: #ded492;">map</span>(convert_status)
+<span style="color: #C586C0;">print</span>(df_shopping[<span style="color: #CE9178;">"Previous Shopper"</span>].<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="org0c6caa7">
+0    1
+1    1
+2    0
+3    0
+4    0
+Name: Previous Shopper, dtype: int64
+</pre>
+
+<p>
+We want to normalize the data, scale it.
+</p>
+
+<div class="src-name" id="org50d21bf">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python">df_shopping[<span style="color: #9CDCFE;">"Annual Income"</span>] <span style="color: #e0e0e0;">=</span> df_shopping[<span style="color: #CE9178;">"Annual Income"</span>] <span style="color: #e0e0e0;">/</span> <span style="color: #BBCCAA;">1000</span>
+<span style="color: #C586C0;">print</span>(df_shopping.<span style="color: #ded492;">head</span>())
+<span style="color: #9CDCFE;">file_path</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">Path</span>(<span style="color: #CE9178;">'../resources/shopping_cleaned.csv'</span>)
+<span style="color: #4EC9B0;">pd</span>.<span style="color: #ded492;">to_csv</span>(file_path, <span style="color: #9CDCFE;">index</span><span style="color: #e0e0e0;">=</span><span style="color: #569CD6;">False</span>)
+</pre>
+</div>
+
+<pre class="example" id="org9480f67">
+   Previous Shopper  ...  Spending Score (1-100)
+0                 1  ...                      39
+1                 1  ...                      81
+2                 0  ...                       6
+3                 0  ...                      77
+4                 0  ...                      40
+
+[5 rows x 4 columns]
+</pre>
+</div>
+</div>
+
+<div id="outline-container-data-transformation-example-2" class="outline-3">
+<h3 id="data-transformation-example-2"><span class="section-number-3">2.2.</span> Data Transformation Example 2</h3>
+<div class="outline-text-3" id="text-data-transformation-example-2">
+<div class="src-name" id="orgfb49210">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #569CD6;">import</span> <span style="color: #4EC9B0;">pandas </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> pd</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> sklearn.preprocessing </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> </span><span style="color: #4EC9B0;">MinMaxScaler</span><span style="color: #4EC9B0;">, </span><span style="color: #4EC9B0;">LabelEncoder</span>
+
+<span style="color: #9CDCFE;">df</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #ded492;">read_csv</span>(<span style="color: #CE9178;">'../resources/marathon_2019.csv'</span>)
+<span style="color: #C586C0;">print</span>(df.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="org84cf0a9">
+  Bib               Name  Age M/F      City State  ...     Pace Proj Time Official Time Overall Gender Division
+0   2  Cherono, Lawrence   30   M   Eldoret   NaN  ...  0:04:53       NaN       2:07:57       1      1        1
+1   6     Desisa, Lelisa   29   M      Ambo   NaN  ...  0:04:53       NaN       2:07:59       2      2        2
+2   7  Kipkemoi, Kenneth   34   M   Eldoret   NaN  ...  0:04:54       NaN       2:08:07       3      3        3
+3   8      Kandie, Felix   32   M      Iten   NaN  ...  0:04:55       NaN       2:08:54       4      4        4
+4  11    Kirui, Geoffrey   26   M  Keringet   NaN  ...  0:04:56       NaN       2:08:55       5      5        5
+
+[5 rows x 24 columns]
+</pre>
+
+<p>
+Subset the dataframe to only the columns &ldquo;Age&rdquo;, &ldquo;M/F&rdquo;, split times (i.e. &ldquo;5K, 10K&rdquo;, etc.), &ldquo;Pace&rdquo;, and &ldquo;Official Time&rdquo;.
+</p>
+<div class="src-name" id="org7ee86ba">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">df</span> <span style="color: #e0e0e0;">=</span> df[[<span style="color: #CE9178;">"Age"</span>, <span style="color: #CE9178;">"M/F"</span>, <span style="color: #CE9178;">"5K"</span>, <span style="color: #CE9178;">"10K"</span>, <span style="color: #CE9178;">"15K"</span>, <span style="color: #CE9178;">"20K"</span>, <span style="color: #CE9178;">"Pace"</span>, <span style="color: #CE9178;">"Official Time"</span>]]
+<span style="color: #C586C0;">print</span>(df.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="org624ebda">
+   Age M/F       5K      10K      15K      20K     Pace Official Time
+0   30   M  0:15:11  0:30:21  0:45:48  1:01:16  0:04:53       2:07:57
+1   29   M  0:15:10  0:30:22  0:45:46  1:01:16  0:04:53       2:07:59
+2   34   M  0:15:14  0:30:22  0:45:47  1:01:17  0:04:54       2:08:07
+3   32   M  0:15:14  0:30:24  0:45:47  1:01:16  0:04:55       2:08:54
+4   26   M  0:15:12  0:30:21  0:45:46  1:01:15  0:04:56       2:08:55
+</pre>
+
+<div class="src-name" id="orgd4999ff">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #C586C0;">print</span>(df.<span style="color: #9CDCFE;">shape</span>)
+df.<span style="color: #ded492;">dropna</span>(<span style="color: #9CDCFE;">inplace</span><span style="color: #e0e0e0;">=</span><span style="color: #569CD6;">True</span>)
+<span style="color: #C586C0;">print</span>(df.<span style="color: #9CDCFE;">shape</span>)
+</pre>
+</div>
+
+<pre class="example" id="orgcfe531b">
+(26647, 8)
+(26647, 8)
+</pre>
+
+<p>
+Convert the time data. We we are going to convert the data to time delta to get how long it took each athlete reach the goal.
+</p>
+
+<div class="src-name" id="org8e5a56d">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">time_columns</span> <span style="color: #e0e0e0;">=</span> [<span style="color: #CE9178;">"5K"</span>, <span style="color: #CE9178;">"10K"</span>, <span style="color: #CE9178;">"15K"</span>, <span style="color: #CE9178;">"20K"</span>, <span style="color: #CE9178;">"Pace"</span>, <span style="color: #CE9178;">"Official Time"</span>]
+df[<span style="color: #9CDCFE;">time_columns</span>] <span style="color: #e0e0e0;">=</span> df[time_columns].<span style="color: #ded492;">apply</span>(<span style="color: #569CD6;">lambda</span> <span style="color: #9CDCFE;">x</span>: x.<span style="color: #ded492;">replace</span>(<span style="color: #CE9178;">'-'</span>, <span style="color: #CE9178;">'0'</span>)).<span style="color: #ded492;">apply</span>(pd.<span style="color: #9CDCFE;">to_timedelta</span>)
+<span style="color: #C586C0;">print</span>(df.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="orgbc45746">
+   Age M/F              5K             10K             15K             20K            Pace   Official Time
+0   30   M 0 days 00:15:11 0 days 00:30:21 0 days 00:45:48 0 days 01:01:16 0 days 00:04:53 0 days 02:07:57
+1   29   M 0 days 00:15:10 0 days 00:30:22 0 days 00:45:46 0 days 01:01:16 0 days 00:04:53 0 days 02:07:59
+2   34   M 0 days 00:15:14 0 days 00:30:22 0 days 00:45:47 0 days 01:01:17 0 days 00:04:54 0 days 02:08:07
+3   32   M 0 days 00:15:14 0 days 00:30:24 0 days 00:45:47 0 days 01:01:16 0 days 00:04:55 0 days 02:08:54
+4   26   M 0 days 00:15:12 0 days 00:30:21 0 days 00:45:46 0 days 01:01:15 0 days 00:04:56 0 days 02:08:55
+</pre>
+
+<p>
+Now we convert time units to seconds so we can process them as integer units.
+</p>
+
+<div class="src-name" id="orgc0819b8">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python">df[<span style="color: #9CDCFE;">time_columns</span>] <span style="color: #e0e0e0;">=</span> df[time_columns].<span style="color: #ded492;">apply</span>(<span style="color: #569CD6;">lambda</span> <span style="color: #9CDCFE;">x</span>: x.<span style="color: #9CDCFE;">dt</span>.<span style="color: #ded492;">total_seconds</span>())
+<span style="color: #C586C0;">print</span>(df.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="org4aae945">
+   Age M/F     5K     10K     15K     20K   Pace  Official Time
+0   30   M  911.0  1821.0  2748.0  3676.0  293.0         7677.0
+1   29   M  910.0  1822.0  2746.0  3676.0  293.0         7679.0
+2   34   M  914.0  1822.0  2747.0  3677.0  294.0         7687.0
+3   32   M  914.0  1824.0  2747.0  3676.0  295.0         7734.0
+4   26   M  912.0  1821.0  2746.0  3675.0  296.0         7735.0
+</pre>
+
+<p>
+We check for zeroes.
+</p>
+
+<div class="src-name" id="orgcb79b56">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #C586C0;">print</span>(df.<span style="color: #9CDCFE;">shape</span>)
+<span style="color: #9CDCFE;">df</span> <span style="color: #e0e0e0;">=</span> df[<span style="color: #e0e0e0;">~</span>(df <span style="color: #e0e0e0;">==</span> <span style="color: #BBCCAA;">0</span>).<span style="color: #ded492;">any</span>(<span style="color: #9CDCFE;">axis</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">1</span>)]
+<span style="color: #C586C0;">print</span>(df.<span style="color: #9CDCFE;">shape</span>)
+</pre>
+</div>
+
+<pre class="example" id="orga42e4b1">
+(26647, 8)
+(24529, 8)
+</pre>
+
+<p>
+Converting labels to numbers using LabelEncoder. This is a scikit learn to convert labels to integers. The fit transform function is fit and predict for the model on some given data. It returns either a 1 or a 2.
+</p>
+
+<div class="src-name" id="org68388a1">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python">df[<span style="color: #9CDCFE;">'M/F'</span>] <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">LabelEncoder</span>().<span style="color: #ded492;">fit_transform</span>(df[<span style="color: #CE9178;">'M/F'</span>])
+<span style="color: #C586C0;">print</span>(df.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="org6054d8f">
+   Age  M/F     5K     10K     15K     20K   Pace  Official Time
+0   30    1  911.0  1821.0  2748.0  3676.0  293.0         7677.0
+1   29    1  910.0  1822.0  2746.0  3676.0  293.0         7679.0
+2   34    1  914.0  1822.0  2747.0  3677.0  294.0         7687.0
+3   32    1  914.0  1824.0  2747.0  3676.0  295.0         7734.0
+4   26    1  912.0  1821.0  2746.0  3675.0  296.0         7735.0
+</pre>
+
+<p>
+We check for types.
+</p>
+
+<div class="src-name" id="orgbf215fe">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #C586C0;">print</span>(df.<span style="color: #9CDCFE;">dtypes</span>)
+</pre>
+</div>
+
+<pre class="example" id="orge214ae0">
+Age                int64
+M/F                int64
+5K               float64
+10K              float64
+15K              float64
+20K              float64
+Pace             float64
+Official Time    float64
+dtype: object
+</pre>
+
+<div class="src-name" id="org0488e59">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python">df[<span style="color: #9CDCFE;">'Age'</span>] <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #ded492;">to_numeric</span>(df[<span style="color: #CE9178;">'Age'</span>])
+<span style="color: #C586C0;">print</span>(df[<span style="color: #CE9178;">'Age'</span>].<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="org44ccb8a">
+0    30
+1    29
+2    34
+3    32
+4    26
+Name: Age, dtype: int64
+</pre>
+
+<p>
+Check for correlation.
+</p>
+
+<div class="src-name" id="org41a2daa">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> matplotlib </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> pyplot </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> plt</span>
+
+<span style="color: #9CDCFE;">file</span> <span style="color: #e0e0e0;">=</span> <span style="color: #CE9178;">'../resources/correlation.png'</span>
+<span style="color: #9CDCFE;">plot</span> <span style="color: #e0e0e0;">=</span> df.<span style="color: #ded492;">plot</span>(<span style="color: #9CDCFE;">kind</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">'scatter'</span>, <span style="color: #9CDCFE;">x</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">'Pace'</span>, <span style="color: #9CDCFE;">y</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">'Official Time'</span>)
+plt.<span style="color: #ded492;">savefig</span>(file)
+<span style="color: #C586C0;">print</span>(file)
+</pre>
+</div>
+
+<div class="org" id="org1a604d9">
+
+<div id="orgd4125a1" class="figure">
+<p><img src="../resources/correlation.png" alt="correlation.png" />
+</p>
+</div>
+
+</div>
+
+<p>
+Finally we scale the data.
+</p>
+
+<div class="src-name" id="org90a7688">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">X</span> <span style="color: #e0e0e0;">=</span> df.<span style="color: #ded492;">drop</span>(<span style="color: #CE9178;">"Pace"</span>, <span style="color: #9CDCFE;">axis</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">1</span>)
+<span style="color: #9CDCFE;">X_scaled</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">MinMaxScaler</span>().<span style="color: #ded492;">fit_transform</span>(<span style="color: #e0e0e0;">X</span>)
+<span style="color: #C586C0;">print</span>(<span style="color: #4EC9B0;">X_scaled</span>[:<span style="color: #BBCCAA;">5</span>])
+</pre>
+</div>
+
+<pre class="example" id="org78c1c9f">
+[[1.84615385e-01 1.00000000e+00 2.72108844e-02 0.00000000e+00
+  4.94722955e-04 2.45730434e-04 0.00000000e+00]
+ [1.69230769e-01 1.00000000e+00 2.68107243e-02 2.49066002e-04
+  1.64907652e-04 2.45730434e-04 1.04920785e-04]
+ [2.46153846e-01 1.00000000e+00 2.84113645e-02 2.49066002e-04
+  3.29815303e-04 3.68595651e-04 5.24603924e-04]
+ [2.15384615e-01 1.00000000e+00 2.84113645e-02 7.47198007e-04
+  3.29815303e-04 2.45730434e-04 2.99024237e-03]
+ [1.23076923e-01 1.00000000e+00 2.76110444e-02 0.00000000e+00
+  1.64907652e-04 1.22865217e-04 3.04270276e-03]]
+</pre>
+
+<p>
+Now we can compare the scaled data to the original one.
+</p>
+<div class="src-name" id="org786599b">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #C586C0;">print</span>(<span style="color: #e0e0e0;">X</span>[:<span style="color: #BBCCAA;">5</span>])
+</pre>
+</div>
+
+<pre class="example" id="orgeed6424">
+   Age  M/F     5K     10K     15K     20K  Official Time
+0   30    1  911.0  1821.0  2748.0  3676.0         7677.0
+1   29    1  910.0  1822.0  2746.0  3676.0         7679.0
+2   34    1  914.0  1822.0  2747.0  3677.0         7687.0
+3   32    1  914.0  1824.0  2747.0  3676.0         7734.0
+4   26    1  912.0  1821.0  2746.0  3675.0         7735.0
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-k-means-algorithm" class="outline-2">
+<h2 id="k-means-algorithm"><span class="section-number-2">3.</span> K-Means Algorithm</h2>
+<div class="outline-text-2" id="text-k-means-algorithm">
+<p>
+K-Means groups together observations that have similar features.
+</p>
+
+<p>
+K-means works by finding centroids in the plane and measure the distance from the centroid to the observation. It will optimize the centroid position that maximazes the distance to other centroid positions and minimizes the distance between all possible observations that can be closest to the centroid.
+</p>
+
+<p>
+We consider an observation part of the cluster if it is within the radius of the cluster.
+</p>
+
+<p>
+The <b>k</b> referes to the number of clusters we want to computer.
+</p>
+
+<ol class="org-ol">
+<li>Randomly initialize the k starting centroids.</li>
+<li>Each data point is assigned to its nearest centroid.</li>
+<li>The centroids are recomputed as the mean of the data points assigned to respective clsuter.</li>
+<li>Repeat 1 to 3 until the stopping criteria is triggered.</li>
+</ol>
+</div>
+
+<div id="outline-container-the-elbow-curve" class="outline-3">
+<h3 id="the-elbow-curve"><span class="section-number-3">3.1.</span> The Elbow Curve</h3>
+<div class="outline-text-3" id="text-the-elbow-curve">
+<p>
+The best number of <b>K</b> can be determined using the elbow curve. The x-axis is the <b>k</b> value and the y-axis is some objective function.
+</p>
+
+<p>
+We will start asking a high number of clusters and we will measure the inertia, then ask for a lower number and continue measuring the inertia. Whenever the inertia goes from a high slope to a lower slope in the curve (as an elbow), we use that point as our <b>k</b> value.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-k-cluster-example" class="outline-2">
+<h2 id="k-cluster-example"><span class="section-number-2">4.</span> K-Cluster Example</h2>
+<div class="outline-text-2" id="text-k-cluster-example">
+</div>
+
+<div id="outline-container-load-the-data" class="outline-3">
+<h3 id="load-the-data"><span class="section-number-3">4.1.</span> Load the Data</h3>
+<div class="outline-text-3" id="text-load-the-data">
+<div class="src-name" id="orgac230e2">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #569CD6;">import</span> <span style="color: #4EC9B0;">pandas </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> pd</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> sklearn.preprocessing </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> </span><span style="color: #4EC9B0;">MinMaxScaler</span><span style="color: #4EC9B0;">, </span><span style="color: #4EC9B0;">LabelEncoder</span>
+
+<span style="color: #579C4C;"># Import the KMeans module and matplotlib</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> sklearn.cluster </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> </span><span style="color: #4EC9B0;">KMeans</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> matplotlib </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> pyplot </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> plt</span>
+
+<span style="color: #9CDCFE;">df</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #ded492;">read_csv</span>(<span style="color: #CE9178;">'../resources/marathon_2019.csv'</span>)
+<span style="color: #9CDCFE;">df</span> <span style="color: #e0e0e0;">=</span> df[[<span style="color: #CE9178;">'Age'</span>, <span style="color: #CE9178;">'M/F'</span>, <span style="color: #CE9178;">'5K'</span>, <span style="color: #CE9178;">'10K'</span>, <span style="color: #CE9178;">'15K'</span>, <span style="color: #CE9178;">'20K'</span>, <span style="color: #CE9178;">'Half'</span>, <span style="color: #CE9178;">'25K'</span>, <span style="color: #CE9178;">'30K'</span>, <span style="color: #CE9178;">'35K'</span>, <span style="color: #CE9178;">'40K'</span>, <span style="color: #CE9178;">'Pace'</span>, <span style="color: #CE9178;">'Official Time'</span>]]
+<span style="color: #C586C0;">print</span>(df.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="org311afd5">
+   Age M/F       5K      10K      15K      20K     Half      25K      30K      35K      40K     Pace Official Time
+0   30   M  0:15:11  0:30:21  0:45:48  1:01:16  1:04:29  1:16:23  1:32:01  1:47:16  2:01:45  0:04:53       2:07:57
+1   29   M  0:15:10  0:30:22  0:45:46  1:01:16  1:04:30  1:16:24  1:32:01  1:47:16  2:01:46  0:04:53       2:07:59
+2   34   M  0:15:14  0:30:22  0:45:47  1:01:17  1:04:31  1:16:24  1:32:01  1:47:16  2:01:45  0:04:54       2:08:07
+3   32   M  0:15:14  0:30:24  0:45:47  1:01:16  1:04:31  1:16:24  1:32:01  1:47:16  2:02:08  0:04:55       2:08:54
+4   26   M  0:15:12  0:30:21  0:45:46  1:01:15  1:04:28  1:16:23  1:32:01  1:47:16  2:01:57  0:04:56       2:08:55
+</pre>
+</div>
+</div>
+
+<div id="outline-container-convert-time-to-time-delta" class="outline-3">
+<h3 id="convert-time-to-time-delta"><span class="section-number-3">4.2.</span> Convert time to Time Delta</h3>
+<div class="outline-text-3" id="text-convert-time-to-time-delta">
+<p>
+We want to convert the time units into seconds. So we convert it to timedelta first, then to total seconds.
+</p>
+
+<div class="src-name" id="org99020e4">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">time_columns</span> <span style="color: #e0e0e0;">=</span> [<span style="color: #CE9178;">"5K"</span>, <span style="color: #CE9178;">"10K"</span>, <span style="color: #CE9178;">"15K"</span>, <span style="color: #CE9178;">"20K"</span>, <span style="color: #CE9178;">"Half"</span>, <span style="color: #CE9178;">"25K"</span>, <span style="color: #CE9178;">"30K"</span>, <span style="color: #CE9178;">"35K"</span>, <span style="color: #CE9178;">"40K"</span>, <span style="color: #CE9178;">"Pace"</span>, <span style="color: #CE9178;">"Official Time"</span>]
+df[<span style="color: #9CDCFE;">time_columns</span>] <span style="color: #e0e0e0;">=</span> df[time_columns].<span style="color: #ded492;">apply</span>(<span style="color: #569CD6;">lambda</span> <span style="color: #9CDCFE;">x</span>: x.<span style="color: #ded492;">replace</span>(<span style="color: #CE9178;">'-'</span>, <span style="color: #CE9178;">'0'</span>)).<span style="color: #ded492;">apply</span>(pd.<span style="color: #9CDCFE;">to_timedelta</span>)
+df[<span style="color: #9CDCFE;">time_columns</span>] <span style="color: #e0e0e0;">=</span> df[time_columns].<span style="color: #ded492;">apply</span>(<span style="color: #569CD6;">lambda</span> <span style="color: #9CDCFE;">x</span>: x.<span style="color: #9CDCFE;">dt</span>.<span style="color: #ded492;">total_seconds</span>())
+<span style="color: #C586C0;">print</span>(df.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="org7ec848f">
+   Age M/F     5K     10K     15K     20K    Half     25K     30K     35K     40K   Pace  Official Time
+0   30   M  911.0  1821.0  2748.0  3676.0  3869.0  4583.0  5521.0  6436.0  7305.0  293.0         7677.0
+1   29   M  910.0  1822.0  2746.0  3676.0  3870.0  4584.0  5521.0  6436.0  7306.0  293.0         7679.0
+2   34   M  914.0  1822.0  2747.0  3677.0  3871.0  4584.0  5521.0  6436.0  7305.0  294.0         7687.0
+3   32   M  914.0  1824.0  2747.0  3676.0  3871.0  4584.0  5521.0  6436.0  7328.0  295.0         7734.0
+4   26   M  912.0  1821.0  2746.0  3675.0  3868.0  4583.0  5521.0  6436.0  7317.0  296.0         7735.0
+</pre>
+</div>
+</div>
+
+<div id="outline-container-clean-the-data" class="outline-3">
+<h3 id="clean-the-data"><span class="section-number-3">4.3.</span> Clean the data</h3>
+<div class="outline-text-3" id="text-clean-the-data">
+<p>
+We will subset the dataframe again, removing all zeroes. Then encode the labels into integers.
+</p>
+
+<div class="src-name" id="orga061fa6">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python">df[<span style="color: #e0e0e0;">~</span>(df <span style="color: #e0e0e0;">==</span> <span style="color: #BBCCAA;">0</span>).<span style="color: #ded492;">any</span>(<span style="color: #9CDCFE;">axis</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">1</span>)]
+df[<span style="color: #9CDCFE;">'M/F'</span>] <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">LabelEncoder</span>().<span style="color: #ded492;">fit_transform</span>(df[<span style="color: #CE9178;">'M/F'</span>])
+<span style="color: #C586C0;">print</span>(df[<span style="color: #CE9178;">'M/F'</span>].<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="org111904d">
+0    1
+1    1
+2    1
+3    1
+4    1
+Name: M/F, dtype: int64
+</pre>
+
+<p>
+Convert to numerics values.
+</p>
+
+<div class="src-name" id="orgafb503e">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python">df[<span style="color: #9CDCFE;">'Age'</span>] <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #ded492;">to_numeric</span>(df[<span style="color: #CE9178;">'Age'</span>])
+<span style="color: #C586C0;">print</span>(df[<span style="color: #CE9178;">'Age'</span>].<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="orgbb5af72">
+0    30
+1    29
+2    34
+3    32
+4    26
+Name: Age, dtype: int64
+</pre>
+
+<p>
+Check correlation of data. It should be linear.
+</p>
+
+<div class="src-name" id="orgeb66e67">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">imgpath</span> <span style="color: #e0e0e0;">=</span> <span style="color: #CE9178;">"../resources/correlation2.png"</span>
+<span style="color: #9CDCFE;">fig</span>, <span style="color: #9CDCFE;">ax</span> <span style="color: #e0e0e0;">=</span> plt.<span style="color: #ded492;">subplots</span>(<span style="color: #9CDCFE;">figsize</span><span style="color: #e0e0e0;">=</span>(<span style="color: #BBCCAA;">5</span>, <span style="color: #BBCCAA;">3</span>))
+ax.<span style="color: #ded492;">scatter</span>(<span style="color: #9CDCFE;">x</span><span style="color: #e0e0e0;">=</span>df[<span style="color: #CE9178;">'Pace'</span>], <span style="color: #9CDCFE;">y</span><span style="color: #e0e0e0;">=</span>df[<span style="color: #CE9178;">'Official Time'</span>])
+fig.<span style="color: #ded492;">savefig</span>(imgpath)
+<span style="color: #C586C0;">print</span>(imgpath)
+</pre>
+</div>
+
+<div class="org" id="orgbd302fd">
+
+<div id="orgf393ee1" class="figure">
+<p><img src="../resources/correlation2.png" alt="correlation2.png" />
+</p>
+</div>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-creating-a-training-set" class="outline-3">
+<h3 id="creating-a-training-set"><span class="section-number-3">4.4.</span> Creating a Training Set</h3>
+<div class="outline-text-3" id="text-creating-a-training-set">
+<p>
+Create a training set &rsquo;X&rsquo; without the &rsquo;Pace&rsquo; column.
+</p>
+
+<div class="src-name" id="orgae6f025">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">X</span> <span style="color: #e0e0e0;">=</span> df.<span style="color: #ded492;">drop</span>(<span style="color: #CE9178;">'Pace'</span>, <span style="color: #9CDCFE;">axis</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">1</span>)
+<span style="color: #9CDCFE;">X_scaled</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">MinMaxScaler</span>().<span style="color: #ded492;">fit_transform</span>(<span style="color: #e0e0e0;">X</span>)
+<span style="color: #C586C0;">print</span>(<span style="color: #4EC9B0;">X_scaled</span>[:<span style="color: #BBCCAA;">5</span>])
+</pre>
+</div>
+
+<pre class="example" id="org6009612">
+[[1.84615385e-01 1.00000000e+00 2.72591263e-01 3.12028787e-01
+  3.11953684e-01 2.96499435e-01 2.95682079e-01 2.83163423e-01
+  2.75073489e-01 2.70272540e-01 2.75670780e-01 0.00000000e+00]
+ [1.69230769e-01 1.00000000e+00 2.72292041e-01 3.12200137e-01
+  3.11726643e-01 2.96499435e-01 2.95758502e-01 2.83225209e-01
+  2.75073489e-01 2.70272540e-01 2.75708517e-01 9.92506575e-05]
+ [2.46153846e-01 1.00000000e+00 2.73488929e-01 3.12200137e-01
+  3.11840163e-01 2.96580094e-01 2.95834925e-01 2.83225209e-01
+  2.75073489e-01 2.70272540e-01 2.75670780e-01 4.96253288e-04]
+ [2.15384615e-01 1.00000000e+00 2.73488929e-01 3.12542838e-01
+  3.11840163e-01 2.96499435e-01 2.95834925e-01 2.83225209e-01
+  2.75073489e-01 2.70272540e-01 2.76538737e-01 2.82864374e-03]
+ [1.23076923e-01 1.00000000e+00 2.72890485e-01 3.12028787e-01
+  3.11726643e-01 2.96418777e-01 2.95605655e-01 2.83163423e-01
+  2.75073489e-01 2.70272540e-01 2.76123627e-01 2.87826907e-03]]
+</pre>
+
+<p>
+Perform K-Means Clustering. We will test for many <b>k</b> values. Then plot the Elbow curve graph.
+</p>
+
+<div class="src-name" id="org1c4dbfc">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">file</span> <span style="color: #e0e0e0;">=</span> <span style="color: #CE9178;">"../resources/elbow1.png"</span>
+<span style="color: #9CDCFE;">sse</span> <span style="color: #e0e0e0;">=</span> {}
+<span style="color: #9CDCFE;">K</span> <span style="color: #e0e0e0;">=</span> <span style="color: #C586C0;">range</span>(<span style="color: #BBCCAA;">1</span>,<span style="color: #BBCCAA;">10</span>)
+<span style="color: #569CD6;">for</span> <span style="color: #9CDCFE;">k</span> <span style="color: #569CD6;">in</span> <span style="color: #e0e0e0;">K</span>:
+    <span style="color: #9CDCFE;">kmeanmodel</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">KMeans</span>(<span style="color: #9CDCFE;">n_clusters</span><span style="color: #e0e0e0;">=</span>k).<span style="color: #ded492;">fit</span>(<span style="color: #4EC9B0;">X_scaled</span>)
+    sse[<span style="color: #9CDCFE;">k</span>]<span style="color: #e0e0e0;">=</span> kmeanmodel.<span style="color: #9CDCFE;">inertia_</span>
+
+<span style="color: #579C4C;"># Plot</span>
+<span style="color: #9CDCFE;">fig</span>, <span style="color: #9CDCFE;">ax</span> <span style="color: #e0e0e0;">=</span> plt.<span style="color: #ded492;">subplots</span>(<span style="color: #9CDCFE;">figsize</span><span style="color: #e0e0e0;">=</span>(<span style="color: #BBCCAA;">6</span>, <span style="color: #BBCCAA;">4</span>))
+ax.<span style="color: #ded492;">plot</span>(<span style="color: #C586C0;">list</span>(sse.<span style="color: #ded492;">keys</span>()), <span style="color: #C586C0;">list</span>(sse.<span style="color: #ded492;">values</span>()))
+ax.<span style="color: #ded492;">set_xlabel</span>(<span style="color: #CE9178;">'k'</span>)
+ax.<span style="color: #ded492;">set_ylabel</span>(<span style="color: #CE9178;">'SSE'</span>)
+ax.<span style="color: #ded492;">set_title</span>(<span style="color: #CE9178;">'Elbow Method'</span>)
+fig.<span style="color: #ded492;">savefig</span>(file)
+<span style="color: #C586C0;">print</span>(file)
+</pre>
+</div>
+
+<div class="org" id="org39e38ee">
+
+<div id="org5d04802" class="figure">
+<p><img src="../resources/elbow1.png" alt="elbow1.png" />
+</p>
+</div>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-chose-number-of-clusters-and-predict" class="outline-3">
+<h3 id="chose-number-of-clusters-and-predict"><span class="section-number-3">4.5.</span> Chose Number of Clusters and Predict</h3>
+<div class="outline-text-3" id="text-chose-number-of-clusters-and-predict">
+<p>
+Create a KMeans model with 3 clusters. Then we calculate the predicted values and add them to the dataframe.
+</p>
+
+<div class="src-name" id="orgf2fe55f">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">model</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">KMeans</span>(<span style="color: #9CDCFE;">n_clusters</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">3</span>, <span style="color: #9CDCFE;">random_state</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">42</span>).<span style="color: #ded492;">fit</span>(<span style="color: #4EC9B0;">X_scaled</span>)
+
+<span style="color: #9CDCFE;">y_pred</span> <span style="color: #e0e0e0;">=</span> model.<span style="color: #ded492;">predict</span>(<span style="color: #4EC9B0;">X_scaled</span>)
+<span style="color: #9CDCFE;">df_y</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #4EC9B0;">DataFrame</span>(y_pred, <span style="color: #9CDCFE;">columns</span><span style="color: #e0e0e0;">=</span>[<span style="color: #CE9178;">'Cluster'</span>])
+<span style="color: #9CDCFE;">combined</span> <span style="color: #e0e0e0;">=</span> df.<span style="color: #ded492;">join</span>(df_y, <span style="color: #9CDCFE;">how</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">'inner'</span>)
+<span style="color: #C586C0;">print</span>(combined.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="org59d2394">
+   Age  M/F     5K     10K     15K     20K    Half     25K     30K     35K     40K   Pace  Official Time  Cluster
+0   30    1  911.0  1821.0  2748.0  3676.0  3869.0  4583.0  5521.0  6436.0  7305.0  293.0         7677.0        2
+1   29    1  910.0  1822.0  2746.0  3676.0  3870.0  4584.0  5521.0  6436.0  7306.0  293.0         7679.0        2
+2   34    1  914.0  1822.0  2747.0  3677.0  3871.0  4584.0  5521.0  6436.0  7305.0  294.0         7687.0        2
+3   32    1  914.0  1824.0  2747.0  3676.0  3871.0  4584.0  5521.0  6436.0  7328.0  295.0         7734.0        2
+4   26    1  912.0  1821.0  2746.0  3675.0  3868.0  4583.0  5521.0  6436.0  7317.0  296.0         7735.0        2
+</pre>
+</div>
+</div>
+
+<div id="outline-container-visualize-the-results" class="outline-3">
+<h3 id="visualize-the-results"><span class="section-number-3">4.6.</span> Visualize the Results</h3>
+<div class="outline-text-3" id="text-visualize-the-results">
+<p>
+Then we can create a boxplot to visualize the data for different clusters.
+</p>
+
+<div class="src-name" id="orge636cc8">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">file</span> <span style="color: #e0e0e0;">=</span> <span style="color: #CE9178;">"../resources/boxplot1.png"</span>
+
+<span style="color: #9CDCFE;">fig</span>, <span style="color: #9CDCFE;">ax</span> <span style="color: #e0e0e0;">=</span> plt.<span style="color: #ded492;">subplots</span>(<span style="color: #9CDCFE;">figsize</span><span style="color: #e0e0e0;">=</span>(<span style="color: #BBCCAA;">6</span>, <span style="color: #BBCCAA;">4</span>))
+ax.<span style="color: #ded492;">boxplot</span>([combined[<span style="color: #CE9178;">"Official Time"</span>][combined[<span style="color: #CE9178;">'Cluster'</span>] <span style="color: #e0e0e0;">==</span> c] <span style="color: #569CD6;">for</span> <span style="color: #9CDCFE;">c</span> <span style="color: #569CD6;">in</span> combined[<span style="color: #CE9178;">'Cluster'</span>].<span style="color: #ded492;">unique</span>()])
+ax.<span style="color: #ded492;">set_ylabel</span>(<span style="color: #CE9178;">'Official Time'</span>)
+ax.<span style="color: #ded492;">set_title</span>(<span style="color: #CE9178;">'Elbow Method'</span>)
+fig.<span style="color: #ded492;">savefig</span>(file)
+<span style="color: #C586C0;">print</span>(file)
+</pre>
+</div>
+
+<div class="org" id="org76eb869">
+
+<div id="orgc174df0" class="figure">
+<p><img src="../resources/boxplot1.png" alt="boxplot1.png" />
+</p>
+</div>
+
+</div>
+
+<div class="src-name" id="orge70d076">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #C586C0;">print</span>(combined.<span style="color: #ded492;">groupby</span>([<span style="color: #CE9178;">'M/F'</span>,<span style="color: #CE9178;">'Cluster'</span>]).<span style="color: #ded492;">describe</span>()[<span style="color: #CE9178;">'Age'</span>])
+</pre>
+</div>
+
+<pre class="example" id="org73b344f">
+               count       mean        std   min   25%   50%   75%   max
+M/F Cluster
+0   1        11981.0  40.545197  10.962787  18.0  31.0  40.0  48.0  80.0
+1   0         5144.0  51.623250  11.951811  18.0  44.0  54.0  60.0  83.0
+    2         9522.0  40.872821   9.594296  18.0  34.0  41.0  48.0  71.0
+</pre>
+</div>
+</div>
+
+<div id="outline-container-organize-the-results" class="outline-3">
+<h3 id="organize-the-results"><span class="section-number-3">4.7.</span> Organize the Results</h3>
+<div class="outline-text-3" id="text-organize-the-results">
+<p>
+Then we re-assign the labels via a function. We create a function that takes in gender and age and assigns an age group based on the following break points for each gender:
+</p>
+
+<ul class="org-ul">
+<li>The lowest 1st quartile</li>
+<li>Each median</li>
+<li>The highest 3rd quartile</li>
+</ul>
+
+<p>
+Then we apply the custom age group to the original data frame and save it to the column &rsquo;Age Group&rsquo;.
+</p>
+
+<div class="src-name" id="org9dd8b62">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #569CD6;">def</span> <span style="color: #ded492;">age_group</span>(<span style="color: #9CDCFE;">gender</span>, <span style="color: #9CDCFE;">age</span>):
+    <span style="color: #569CD6;">if</span> gender <span style="color: #e0e0e0;">==</span> <span style="color: #BBCCAA;">0</span>:
+        <span style="color: #569CD6;">if</span> age <span style="color: #e0e0e0;">&lt;</span> <span style="color: #BBCCAA;">29</span>:
+            <span style="color: #569CD6;">return</span> <span style="color: #BBCCAA;">0</span>
+        <span style="color: #569CD6;">elif</span> age <span style="color: #e0e0e0;">&lt;</span> <span style="color: #BBCCAA;">36</span>:
+            <span style="color: #569CD6;">return</span> <span style="color: #BBCCAA;">1</span>
+        <span style="color: #569CD6;">elif</span> age <span style="color: #e0e0e0;">&lt;</span> <span style="color: #BBCCAA;">41</span>:
+            <span style="color: #569CD6;">return</span> <span style="color: #BBCCAA;">2</span>
+        <span style="color: #569CD6;">elif</span> age <span style="color: #e0e0e0;">&lt;</span> <span style="color: #BBCCAA;">45</span>:
+            <span style="color: #569CD6;">return</span> <span style="color: #BBCCAA;">3</span>
+        <span style="color: #569CD6;">elif</span> age <span style="color: #e0e0e0;">&lt;</span> <span style="color: #BBCCAA;">51</span>:
+            <span style="color: #569CD6;">return</span> <span style="color: #BBCCAA;">4</span>
+        <span style="color: #569CD6;">else</span>:
+            <span style="color: #569CD6;">return</span> <span style="color: #BBCCAA;">5</span>
+    <span style="color: #569CD6;">if</span> gender <span style="color: #e0e0e0;">==</span> <span style="color: #BBCCAA;">1</span>:
+        <span style="color: #569CD6;">if</span> age <span style="color: #e0e0e0;">&lt;</span> <span style="color: #BBCCAA;">33</span>:
+            <span style="color: #569CD6;">return</span> <span style="color: #BBCCAA;">0</span>
+        <span style="color: #569CD6;">elif</span> age <span style="color: #e0e0e0;">&lt;</span> <span style="color: #BBCCAA;">40</span>:
+            <span style="color: #569CD6;">return</span> <span style="color: #BBCCAA;">1</span>
+        <span style="color: #569CD6;">elif</span> age <span style="color: #e0e0e0;">&lt;</span> <span style="color: #BBCCAA;">48</span>:
+            <span style="color: #569CD6;">return</span> <span style="color: #BBCCAA;">2</span>
+        <span style="color: #569CD6;">elif</span> age <span style="color: #e0e0e0;">&lt;</span> <span style="color: #BBCCAA;">53</span>:
+            <span style="color: #569CD6;">return</span> <span style="color: #BBCCAA;">3</span>
+        <span style="color: #569CD6;">elif</span> age <span style="color: #e0e0e0;">&lt;</span> <span style="color: #BBCCAA;">60</span>:
+            <span style="color: #569CD6;">return</span> <span style="color: #BBCCAA;">4</span>
+        <span style="color: #569CD6;">else</span>:
+            <span style="color: #569CD6;">return</span> <span style="color: #BBCCAA;">5</span>
+df[<span style="color: #9CDCFE;">'Age Group'</span>] <span style="color: #e0e0e0;">=</span> df.<span style="color: #ded492;">apply</span>(<span style="color: #569CD6;">lambda</span> <span style="color: #9CDCFE;">row</span>: <span style="color: #ded492;">age_group</span>(row[<span style="color: #CE9178;">'M/F'</span>], row[<span style="color: #CE9178;">'Age'</span>]), <span style="color: #9CDCFE;">axis</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">1</span>)
+<span style="color: #C586C0;">print</span>(df.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="org991c178">
+   Age  M/F     5K     10K     15K     20K    Half     25K     30K     35K     40K   Pace  Official Time  Age Group
+0   30    1  911.0  1821.0  2748.0  3676.0  3869.0  4583.0  5521.0  6436.0  7305.0  293.0         7677.0          0
+1   29    1  910.0  1822.0  2746.0  3676.0  3870.0  4584.0  5521.0  6436.0  7306.0  293.0         7679.0          0
+2   34    1  914.0  1822.0  2747.0  3677.0  3871.0  4584.0  5521.0  6436.0  7305.0  294.0         7687.0          1
+3   32    1  914.0  1824.0  2747.0  3676.0  3871.0  4584.0  5521.0  6436.0  7328.0  295.0         7734.0          0
+4   26    1  912.0  1821.0  2746.0  3675.0  3868.0  4583.0  5521.0  6436.0  7317.0  296.0         7735.0          0
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-principal-component-analysis" class="outline-2">
+<h2 id="principal-component-analysis"><span class="section-number-2">5.</span> Principal Component Analysis</h2>
+<div class="outline-text-2" id="text-principal-component-analysis">
+<p>
+PCA reduces the dataset into a smaller set of dimensions called <b>principal components</b>. The objective is to have a very well represented set of components for our feature set, even if it&rsquo;s hard for us to understand why this is.
+</p>
+
+<p>
+The principal components don&rsquo;t look a lot like the original dataset. We will always lose data but we want to keep as much information as possible. If we lose too much data, we risk losing an important part of the variation we are looking at.
+</p>
+
+<p>
+The <b>explained variance ratio</b> tells us how much of each component captures the variance of the dimensions.
+</p>
+
+<p>
+This is an iterative process where we can go back to increase the number of components to see if we can capture more data or if we can work with the current number of components. We normally want to aim for over 90 percent of the variance ratio.
+</p>
+</div>
+</div>
+
+<div id="outline-container-example-of-pca" class="outline-2">
+<h2 id="example-of-pca"><span class="section-number-2">6.</span> Example of PCA</h2>
+<div class="outline-text-2" id="text-example-of-pca">
+</div>
+
+<div id="outline-container-load-the-data" class="outline-3">
+<h3 id="load-the-data"><span class="section-number-3">6.1.</span> Load the Data</h3>
+<div class="outline-text-3" id="text-load-the-data">
+<p>
+We want to reduce the dimensions of the consumers shopping dataset from 4 to 2 featues. Then we can use K-means for segmentation.
+</p>
+
+<div class="src-name" id="org2162f0f">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #569CD6;">import</span> <span style="color: #4EC9B0;">pandas </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> pd</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> pathlib </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> </span><span style="color: #4EC9B0;">Path</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> sklearn.preprocessing </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> </span><span style="color: #4EC9B0;">StandardScaler</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> sklearn.decomposition </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> </span><span style="color: #e0e0e0;">PCA</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> sklearn.cluster </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> </span><span style="color: #4EC9B0;">KMeans</span>
+
+<span style="color: #9CDCFE;">file_path</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">Path</span>(<span style="color: #CE9178;">"../resources/shopping_data_cleaned.csv"</span>)
+<span style="color: #9CDCFE;">df</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #ded492;">read_csv</span>(file_path)
+<span style="color: #C586C0;">print</span>(df.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="orgb50ab02">
+   Previous Shopper  Age  Annual Income  Spending Score (1-100)
+0                 1   19           15.0                      39
+1                 1   21           15.0                      81
+2                 0   20           16.0                       6
+3                 0   23           16.0                      77
+4                 0   31           17.0                      40
+</pre>
+</div>
+</div>
+
+<div id="outline-container-standarize-scale-the-data" class="outline-3">
+<h3 id="standarize-scale-the-data"><span class="section-number-3">6.2.</span> Standarize / Scale the data</h3>
+<div class="outline-text-3" id="text-standarize-scale-the-data">
+<div class="src-name" id="org40c5fda">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">df_scaled</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">StandardScaler</span>().<span style="color: #ded492;">fit_transform</span>(df)
+<span style="color: #C586C0;">print</span>(df_scaled[<span style="color: #BBCCAA;">0</span>:<span style="color: #BBCCAA;">5</span>])
+</pre>
+</div>
+
+<pre class="example" id="org96fc585">
+[[ 1.12815215 -1.42456879 -1.73899919 -0.43480148]
+ [ 1.12815215 -1.28103541 -1.73899919  1.19570407]
+ [-0.88640526 -1.3528021  -1.70082976 -1.71591298]
+ [-0.88640526 -1.13750203 -1.70082976  1.04041783]
+ [-0.88640526 -0.56336851 -1.66266033 -0.39597992]]
+</pre>
+</div>
+</div>
+
+<div id="outline-container-use-the-pca" class="outline-3">
+<h3 id="use-the-pca"><span class="section-number-3">6.3.</span> Use the PCA</h3>
+<div class="outline-text-3" id="text-use-the-pca">
+<p>
+Then we transform the PCA data to a dataframe and we take a look at the explained variance ratio.
+</p>
+
+<div class="src-name" id="org98ff489">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">pca</span> <span style="color: #e0e0e0;">=</span> <span style="color: #e0e0e0;">PCA</span>(<span style="color: #9CDCFE;">n_components</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">2</span>)
+<span style="color: #9CDCFE;">data</span> <span style="color: #e0e0e0;">=</span> pca.<span style="color: #ded492;">fit_transform</span>(df_scaled)
+
+<span style="color: #9CDCFE;">df_pca</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #4EC9B0;">DataFrame</span>(
+    <span style="color: #9CDCFE;">data</span><span style="color: #e0e0e0;">=</span>data,
+    <span style="color: #9CDCFE;">columns</span><span style="color: #e0e0e0;">=</span>[<span style="color: #CE9178;">"principal component 1"</span>, <span style="color: #CE9178;">"principal component 2"</span>]
+)
+<span style="color: #C586C0;">print</span>(df_pca.<span style="color: #ded492;">head</span>())
+<span style="color: #C586C0;">print</span>(pca.<span style="color: #9CDCFE;">explained_variance_ratio_</span>)
+</pre>
+</div>
+
+<pre class="example" id="org2fa0ab3">
+   principal component 1  principal component 2
+0              -0.406383              -0.520714
+1              -1.427673              -0.367310
+2               0.050761              -1.894068
+3              -1.694513              -1.631908
+4              -0.313108              -1.810483
+[0.33690046 0.26230645]
+</pre>
+
+<p>
+We have a total of 60% of the information from the two components. We will see wether increasing the number of components will incrase it.
+</p>
+
+<div class="src-name" id="org06dbfcf">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">pca</span> <span style="color: #e0e0e0;">=</span> <span style="color: #e0e0e0;">PCA</span>(<span style="color: #9CDCFE;">n_components</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">3</span>)
+<span style="color: #9CDCFE;">data</span> <span style="color: #e0e0e0;">=</span> pca.<span style="color: #ded492;">fit_transform</span>(df_scaled)
+
+<span style="color: #9CDCFE;">df_pca</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #4EC9B0;">DataFrame</span>(
+    <span style="color: #9CDCFE;">data</span><span style="color: #e0e0e0;">=</span>data,
+    <span style="color: #9CDCFE;">columns</span><span style="color: #e0e0e0;">=</span>[<span style="color: #CE9178;">"PC1"</span>, <span style="color: #CE9178;">"PC2"</span>, <span style="color: #CE9178;">"PC3"</span>]
+)
+<span style="color: #C586C0;">print</span>(df_pca.<span style="color: #ded492;">head</span>())
+<span style="color: #C586C0;">print</span>(pca.<span style="color: #9CDCFE;">explained_variance_ratio_</span>)
+</pre>
+</div>
+
+<pre class="example" id="org4a8f7b7">
+        PC1       PC2       PC3
+0 -0.406383 -0.520714 -2.072527
+1 -1.427673 -0.367310 -2.277644
+2  0.050761 -1.894068 -0.367375
+3 -1.694513 -1.631908 -0.717467
+4 -0.313108 -1.810483 -0.426460
+[0.33690046 0.26230645 0.23260639]
+</pre>
+
+<p>
+We get a total of 83 percent of the information. This is good enough to continue.
+</p>
+</div>
+</div>
+
+<div id="outline-container-k-means-clustering" class="outline-3">
+<h3 id="k-means-clustering"><span class="section-number-3">6.4.</span> K-means clustering</h3>
+<div class="outline-text-3" id="text-k-means-clustering">
+<p>
+Now we can use a K-means clustering algorithm.
+</p>
+
+<div class="src-name" id="orgae96abd">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">model</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">KMeans</span>(<span style="color: #9CDCFE;">n_clusters</span><span style="color: #e0e0e0;">=</span>k, <span style="color: #9CDCFE;">random_state</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">0</span>).<span style="color: #ded492;">fit</span>(df_pca)
+
+<span style="color: #9CDCFE;">predictions</span> <span style="color: #e0e0e0;">=</span> model.<span style="color: #ded492;">predict</span>(df_pca)
+df_pca[<span style="color: #9CDCFE;">"class"</span>] <span style="color: #e0e0e0;">=</span> model.<span style="color: #9CDCFE;">labels_</span>
+<span style="color: #C586C0;">print</span>(df_pca.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="org5ae0733">
+        PC1       PC2       PC3  class
+0 -0.406383 -0.520714 -2.072527      4
+1 -1.427673 -0.367310 -2.277644      4
+2  0.050761 -1.894068 -0.367375      2
+3 -1.694513 -1.631908 -0.717467      8
+4 -0.313108 -1.810483 -0.426460      8
+</pre>
+</div>
+</div>
+
+<div id="outline-container-visualize-the-results" class="outline-3">
+<h3 id="visualize-the-results"><span class="section-number-3">6.5.</span> Visualize the Results</h3>
+<div class="outline-text-3" id="text-visualize-the-results">
+<p>
+We will get a 3D plane in this case with all the new features spread accross it.
+</p>
+
+<div class="src-name" id="org28b274a">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #569CD6;">import</span> <span style="color: #4EC9B0;">plotly.express </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> px</span>
+<span style="color: #9CDCFE;">fig</span> <span style="color: #e0e0e0;">=</span> px.<span style="color: #ded492;">scatter_3d</span>(
+    df_pca,
+    <span style="color: #9CDCFE;">x</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">"PC3"</span>,
+    <span style="color: #9CDCFE;">y</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">"PC2"</span>,
+    <span style="color: #9CDCFE;">z</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">"PC1"</span>,
+    <span style="color: #9CDCFE;">color</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">"class"</span>,
+    <span style="color: #9CDCFE;">symbol</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">"class"</span>,
+    <span style="color: #9CDCFE;">width</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">800</span>,
+)
+fig.<span style="color: #ded492;">update_layout</span>(<span style="color: #9CDCFE;">legend</span><span style="color: #e0e0e0;">=</span><span style="color: #C586C0;">dict</span>(<span style="color: #9CDCFE;">x</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">0</span>, <span style="color: #9CDCFE;">y</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">1</span>))
+fig.<span style="color: #ded492;">show</span>()
+</pre>
+</div>
+
+
+<div id="orgac43e08" class="figure">
+<p><img src="../resources/pca1.png" alt="pca1.png" width="500px" />
+</p>
+</div>
+
+
+<div id="orgc28bf0a" class="figure">
+<p><img src="../resources/pca2.png" alt="pca2.png" width="500px" />
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-pca-example-2" class="outline-2">
+<h2 id="pca-example-2"><span class="section-number-2">7.</span> PCA Example 2</h2>
+<div class="outline-text-2" id="text-pca-example-2">
+<p>
+We will go back to the last K-means example and use that data to apply PCA to it.
+</p>
+</div>
+
+<div id="outline-container-clean-the-data" class="outline-3">
+<h3 id="clean-the-data"><span class="section-number-3">7.1.</span> Clean the data</h3>
+<div class="outline-text-3" id="text-clean-the-data">
+<p>
+We will get rid of the columns we are not interested in.
+</p>
+
+<div class="src-name" id="org2ccd29a">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">X</span> <span style="color: #e0e0e0;">=</span> df.<span style="color: #ded492;">drop</span>([<span style="color: #CE9178;">"Age"</span>, <span style="color: #CE9178;">"Pace"</span>], <span style="color: #9CDCFE;">axis</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">1</span>)
+<span style="color: #9CDCFE;">X_scaled</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">MinMaxScaler</span>().<span style="color: #ded492;">fit_transform</span>(<span style="color: #e0e0e0;">X</span>)
+<span style="color: #C586C0;">print</span>(<span style="color: #4EC9B0;">X_scaled</span>[:<span style="color: #BBCCAA;">5</span>])
+</pre>
+</div>
+
+<pre class="example" id="org34b0aa1">
+[[1.00000000e+00 2.72591263e-01 3.12028787e-01 3.11953684e-01
+  2.96499435e-01 2.95682079e-01 2.83163423e-01 2.75073489e-01
+  2.70272540e-01 2.75670780e-01 0.00000000e+00 0.00000000e+00]
+ [1.00000000e+00 2.72292041e-01 3.12200137e-01 3.11726643e-01
+  2.96499435e-01 2.95758502e-01 2.83225209e-01 2.75073489e-01
+  2.70272540e-01 2.75708517e-01 9.92506575e-05 0.00000000e+00]
+ [1.00000000e+00 2.73488929e-01 3.12200137e-01 3.11840163e-01
+  2.96580094e-01 2.95834925e-01 2.83225209e-01 2.75073489e-01
+  2.70272540e-01 2.75670780e-01 4.96253288e-04 2.00000000e-01]
+ [1.00000000e+00 2.73488929e-01 3.12542838e-01 3.11840163e-01
+  2.96499435e-01 2.95834925e-01 2.83225209e-01 2.75073489e-01
+  2.70272540e-01 2.76538737e-01 2.82864374e-03 0.00000000e+00]
+ [1.00000000e+00 2.72890485e-01 3.12028787e-01 3.11726643e-01
+  2.96418777e-01 2.95605655e-01 2.83163423e-01 2.75073489e-01
+  2.70272540e-01 2.76123627e-01 2.87826907e-03 0.00000000e+00]]
+</pre>
+
+<p>
+We can observe that we currently have 12 features. So we are going to use PCA to simplify this.
+</p>
+</div>
+</div>
+
+<div id="outline-container-applying-pca" class="outline-3">
+<h3 id="applying-pca"><span class="section-number-3">7.2.</span> Applying PCA</h3>
+<div class="outline-text-3" id="text-applying-pca">
+<p>
+We will use two dimensions to start with.
+</p>
+
+<div class="src-name" id="orgb820455">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">pca</span> <span style="color: #e0e0e0;">=</span> <span style="color: #e0e0e0;">PCA</span>(<span style="color: #9CDCFE;">n_components</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">2</span>)
+pca.<span style="color: #ded492;">fit</span>(<span style="color: #4EC9B0;">X_scaled</span>)
+<span style="color: #9CDCFE;">X_pca</span> <span style="color: #e0e0e0;">=</span> pca.<span style="color: #ded492;">transform</span>(<span style="color: #4EC9B0;">X_scaled</span>)
+<span style="color: #C586C0;">print</span>(pca.<span style="color: #9CDCFE;">explained_variance_ratio_</span>)
+</pre>
+</div>
+
+<pre class="example" id="orgaf15b46">
+[0.55211069 0.26751402]
+</pre>
+
+<p>
+Note that the first dimension explains 55 percent of all twelve dimensions. This is because most of our features are highly correlated, in this case, most are related to speed and endurance of the runners so even if these dimensions don&rsquo;t relate specifically to those two labels, we can use them for creating our clusters.
+</p>
+</div>
+</div>
+
+<div id="outline-container-visualize-pca" class="outline-3">
+<h3 id="visualize-pca"><span class="section-number-3">7.3.</span> Visualize PCA</h3>
+<div class="outline-text-3" id="text-visualize-pca">
+<div class="src-name" id="org932e6e7">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> hvplot.pandas</span>
+<span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> hvplot</span>
+
+<span style="color: #9CDCFE;">df_pca</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #4EC9B0;">DataFrame</span>(<span style="color: #4EC9B0;">X_pca</span>, <span style="color: #9CDCFE;">columns</span><span style="color: #e0e0e0;">=</span>[<span style="color: #CE9178;">"PC1"</span>, <span style="color: #CE9178;">"PC2"</span>])
+<span style="color: #9CDCFE;">plot</span> <span style="color: #e0e0e0;">=</span> df_pca.<span style="color: #9CDCFE;">hvplot</span>.<span style="color: #ded492;">scatter</span>(<span style="color: #9CDCFE;">x</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">"PC1"</span>, <span style="color: #9CDCFE;">y</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">"PC2"</span>)
+hvplot.<span style="color: #ded492;">save</span>(plot, <span style="color: #CE9178;">'../resources/pca3.html'</span>)
+</pre>
+</div>
+
+
+<div id="orgddb75ad" class="figure">
+<p><img src="../resources/pca3.png" alt="pca3.png" width="600px" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-visualize-elbow-curve" class="outline-3">
+<h3 id="visualize-elbow-curve"><span class="section-number-3">7.4.</span> Visualize Elbow Curve</h3>
+<div class="outline-text-3" id="text-visualize-elbow-curve">
+<p>
+We will fit the PCA data to the KMeans model now, instead of the complete set of dimensions from before.
+</p>
+
+<div class="src-name" id="org344d8f5">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">file</span> <span style="color: #e0e0e0;">=</span> <span style="color: #CE9178;">"../resources/elbow2.png"</span>
+<span style="color: #9CDCFE;">sse</span> <span style="color: #e0e0e0;">=</span> {}
+<span style="color: #9CDCFE;">K</span> <span style="color: #e0e0e0;">=</span> <span style="color: #C586C0;">range</span>(<span style="color: #BBCCAA;">1</span>,<span style="color: #BBCCAA;">10</span>)
+<span style="color: #569CD6;">for</span> <span style="color: #9CDCFE;">k</span> <span style="color: #569CD6;">in</span> <span style="color: #e0e0e0;">K</span>:
+    <span style="color: #9CDCFE;">kmeanmodel</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">KMeans</span>(<span style="color: #9CDCFE;">n_clusters</span><span style="color: #e0e0e0;">=</span>k).<span style="color: #ded492;">fit</span>(<span style="color: #4EC9B0;">X_pca</span>)
+    sse[<span style="color: #9CDCFE;">k</span>]<span style="color: #e0e0e0;">=</span> kmeanmodel.<span style="color: #9CDCFE;">inertia_</span>
+
+<span style="color: #579C4C;"># Plot</span>
+<span style="color: #9CDCFE;">fig</span>, <span style="color: #9CDCFE;">ax</span> <span style="color: #e0e0e0;">=</span> plt.<span style="color: #ded492;">subplots</span>(<span style="color: #9CDCFE;">figsize</span><span style="color: #e0e0e0;">=</span>(<span style="color: #BBCCAA;">6</span>, <span style="color: #BBCCAA;">4</span>))
+ax.<span style="color: #ded492;">plot</span>(<span style="color: #C586C0;">list</span>(sse.<span style="color: #ded492;">keys</span>()), <span style="color: #C586C0;">list</span>(sse.<span style="color: #ded492;">values</span>()))
+ax.<span style="color: #ded492;">set_xlabel</span>(<span style="color: #CE9178;">'k'</span>)
+ax.<span style="color: #ded492;">set_ylabel</span>(<span style="color: #CE9178;">'SSE'</span>)
+ax.<span style="color: #ded492;">set_title</span>(<span style="color: #CE9178;">'Elbow Method'</span>)
+fig.<span style="color: #ded492;">savefig</span>(file)
+<span style="color: #C586C0;">print</span>(file)
+</pre>
+</div>
+
+<div class="org" id="org689ccbb">
+
+<div id="org36822db" class="figure">
+<p><img src="../resources/elbow2.png" alt="elbow2.png" />
+</p>
+</div>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-select-amount-of-clusters-and-build-model" class="outline-3">
+<h3 id="select-amount-of-clusters-and-build-model"><span class="section-number-3">7.5.</span> Select Amount of Clusters and build Model</h3>
+<div class="outline-text-3" id="text-select-amount-of-clusters-and-build-model">
+<div class="src-name" id="org2cdb15a">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">model</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">KMeans</span>(<span style="color: #9CDCFE;">n_clusters</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">4</span>, <span style="color: #9CDCFE;">random_state</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">42</span>).<span style="color: #ded492;">fit</span>(<span style="color: #4EC9B0;">X_pca</span>)
+<span style="color: #9CDCFE;">y_pred</span> <span style="color: #e0e0e0;">=</span> model.<span style="color: #ded492;">fit_predict</span>(<span style="color: #4EC9B0;">X_pca</span>)
+<span style="color: #C586C0;">print</span>(y_pred[:<span style="color: #BBCCAA;">10</span>])
+</pre>
+</div>
+
+<pre class="example" id="orgd44e4b6">
+[1 1 1 1 1 1 1 1 1 1]
+</pre>
+</div>
+</div>
+
+<div id="outline-container-visualize-the-results" class="outline-3">
+<h3 id="visualize-the-results"><span class="section-number-3">7.6.</span> Visualize the Results</h3>
+<div class="outline-text-3" id="text-visualize-the-results">
+<div class="src-name" id="orge66bae9">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python">df_pca[<span style="color: #9CDCFE;">'cluster'</span>] <span style="color: #e0e0e0;">=</span> y_pred
+
+<span style="color: #9CDCFE;">plot</span> <span style="color: #e0e0e0;">=</span> df_pca.<span style="color: #9CDCFE;">hvplot</span>.<span style="color: #ded492;">scatter</span>(<span style="color: #9CDCFE;">x</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">"PC1"</span>, <span style="color: #9CDCFE;">y</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">"PC2"</span>, <span style="color: #9CDCFE;">by</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">"cluster"</span>)
+hvplot.<span style="color: #ded492;">save</span>(plot, <span style="color: #CE9178;">'../resources/pca4.html'</span>)
+</pre>
+</div>
+
+
+<div id="org8e4a7aa" class="figure">
+<p><img src="../resources/pca4.png" alt="pca4.png" width="500px" />
+</p>
+</div>
+
+<p>
+We can observe that we have two cuts in our two dimensions, a negative correlation between PCA1 and PCA2. Then in color we have our clusters very defined.
+</p>
+
+<div class="src-name" id="org5545241">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">df_y</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #4EC9B0;">DataFrame</span>(y_pred, <span style="color: #9CDCFE;">columns</span><span style="color: #e0e0e0;">=</span>[<span style="color: #CE9178;">'Cluster'</span>])
+<span style="color: #9CDCFE;">combined</span> <span style="color: #e0e0e0;">=</span> df.<span style="color: #ded492;">join</span>(df_y, <span style="color: #9CDCFE;">how</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">'inner'</span>)
+<span style="color: #C586C0;">print</span>(combined.<span style="color: #ded492;">head</span>())
+</pre>
+</div>
+
+<pre class="example" id="orgcb3ae93">
+   Age  M/F     5K     10K     15K     20K    Half     25K     30K     35K     40K   Pace  Official Time  Age Group  Cluster
+0   30    1  911.0  1821.0  2748.0  3676.0  3869.0  4583.0  5521.0  6436.0  7305.0  293.0         7677.0          0        1
+1   29    1  910.0  1822.0  2746.0  3676.0  3870.0  4584.0  5521.0  6436.0  7306.0  293.0         7679.0          0        1
+2   34    1  914.0  1822.0  2747.0  3677.0  3871.0  4584.0  5521.0  6436.0  7305.0  294.0         7687.0          1        1
+3   32    1  914.0  1824.0  2747.0  3676.0  3871.0  4584.0  5521.0  6436.0  7328.0  295.0         7734.0          0        1
+4   26    1  912.0  1821.0  2746.0  3675.0  3868.0  4583.0  5521.0  6436.0  7317.0  296.0         7735.0          0        1
+</pre>
+
+
+<div class="src-name" id="org45d8ee5">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">file</span> <span style="color: #e0e0e0;">=</span> <span style="color: #CE9178;">"../resources/boxplot3.png"</span>
+
+combined.<span style="color: #ded492;">boxplot</span>([<span style="color: #CE9178;">'Pace'</span>], <span style="color: #9CDCFE;">by</span><span style="color: #e0e0e0;">=</span>[<span style="color: #CE9178;">'M/F'</span>, <span style="color: #CE9178;">'Cluster'</span>])
+
+plt.<span style="color: #ded492;">savefig</span>(file)
+<span style="color: #C586C0;">print</span>(file)
+</pre>
+</div>
+
+<div class="org" id="orga60b08c">
+
+<div id="orgcf71812" class="figure">
+<p><img src="../resources/boxplot3.png" alt="boxplot3.png" />
+</p>
+</div>
+
+</div>
+
+<p>
+There seems to be a pattern. The pattern is the same as the cut we saw in the scatter plot. So clusters 1, 3 seem to have a significantly higher pace, while clusters 0, 2 have a significantly lower pace.
+</p>
+</div>
+</div>
+
+<div id="outline-container-display-summary-statistics" class="outline-3">
+<h3 id="display-summary-statistics"><span class="section-number-3">7.7.</span> Display summary statistics</h3>
+<div class="outline-text-3" id="text-display-summary-statistics">
+<p>
+We can take a look at the summary statistics to try to find a way to suggest a cut for the basis so we can create categories for the marathon.
+</p>
+
+<div class="src-name" id="org11dc650">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #C586C0;">print</span>(combined.<span style="color: #ded492;">groupby</span>([<span style="color: #CE9178;">'M/F'</span>, <span style="color: #CE9178;">'Cluster'</span>]).<span style="color: #ded492;">describe</span>()[<span style="color: #CE9178;">'Pace'</span>])
+</pre>
+</div>
+
+<pre class="example" id="orgcb24b3d">
+              count        mean        std    min    25%    50%    75%     max
+M/F Cluster
+0   0        5695.0  598.411414  88.711040  402.0  532.0  578.0  648.0  1021.0
+    3        6286.0  528.745625  85.410255  329.0  473.0  506.0  567.0   863.0
+1   1        8289.0  463.627337  81.862134  293.0  409.0  443.0  497.0   848.0
+    2        6377.0  572.265799  99.287868  349.0  494.0  551.0  633.0  1062.0
+</pre>
+
+<p>
+Setting a value of 525 would be a good place to split the first quartile of the fast to the thrid quartile of the slowest. So we find where of the two categories come close and then declare a line where we make a decision to separate them.
+</p>
+
+<p>
+<b>Note</b> that we don&rsquo;t actively try to understand the meaning of PCA dimensions, we make a decision at the end of the analysis, after we already made the prediction (clustering) with our model.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-hierarchical-clustering" class="outline-2">
+<h2 id="hierarchical-clustering"><span class="section-number-2">8.</span> Hierarchical Clustering</h2>
+<div class="outline-text-2" id="text-hierarchical-clustering">
+<p>
+Hierarchical Clustering builds a hierarchy of connections based on distance of the clusters. The dendogram allows us to read this hierarchy.
+</p>
+</div>
+
+<div id="outline-container-dendograms" class="outline-3">
+<h3 id="dendograms"><span class="section-number-3">8.1.</span> Dendograms</h3>
+<div class="outline-text-3" id="text-dendograms">
+<p>
+Dendograms are tree-like structures where each cluster starts at the bottom.
+</p>
+
+
+<div id="org260fe5d" class="figure">
+<p><img src="../resources/dendogram.png" alt="dendogram.png" width="500px" />
+</p>
+</div>
+
+<p>
+Each dendrite ending at the bottom is a cluster. For each cluster, the algorithm will find the closest neighbor and it will put it beside it, then connects them with a dendrite that goes as high as the distance between the clusters. So the lower the connection is positioned in the dendogram, the closer they are in the distribution. This replicates with the subsequent connections in the dendogram.
+</p>
+
+<p>
+For this hierarchy to be formed, we need to have the data normalized. We will use the <code>dendogram</code> from <code>scipy</code> to create these hierachies.
+</p>
+
+<p>
+There are different types of linkage methods.
+</p>
+
+<ol class="org-ol">
+<li>Single: The difference between two clusters is defined by the closest distance between two clusters.</li>
+<li>Complete: The difference between two clusters is defined by the farthest distance between two cluters.</li>
+<li>Ward: This method is based on the squared euclidean distance between clusters. It&rsquo;s the method often used as default.</li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-hierarchical-cluster-example" class="outline-2">
+<h2 id="hierarchical-cluster-example"><span class="section-number-2">9.</span> Hierarchical Cluster Example</h2>
+<div class="outline-text-2" id="text-hierarchical-cluster-example">
+</div>
+
+<div id="outline-container-imports" class="outline-3">
+<h3 id="imports"><span class="section-number-3">9.1.</span> Imports</h3>
+<div class="outline-text-3" id="text-imports">
+<div class="src-name" id="org56c67bb">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> sklearn.preprocessing </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> normalize</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> scipy.cluster.hierarchy </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> dendrogram, linkage</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> sklearn.cluster </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> </span><span style="color: #4EC9B0;">AgglomerativeClustering</span>
+<span style="color: #569CD6;">import</span> <span style="color: #4EC9B0;">matplotlib.pyplot </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> plt</span>
+<span style="color: #569CD6;">from</span><span style="color: #4EC9B0;"> pathlib </span><span style="color: #569CD6;">import</span><span style="color: #4EC9B0;"> </span><span style="color: #4EC9B0;">Path</span>
+<span style="color: #569CD6;">import</span> <span style="color: #4EC9B0;">pandas </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> pd</span>
+<span style="color: #569CD6;">import</span> <span style="color: #4EC9B0;">numpy </span><span style="color: #569CD6;">as</span><span style="color: #4EC9B0;"> np</span>
+</pre>
+</div>
+
+<pre class="example" id="org140c3cf">
+
+</pre>
+</div>
+</div>
+
+<div id="outline-container-load-and-normalize-the-data" class="outline-3">
+<h3 id="load-and-normalize-the-data"><span class="section-number-3">9.2.</span> Load and Normalize the Data</h3>
+<div class="outline-text-3" id="text-load-and-normalize-the-data">
+<div class="src-name" id="orgf37a16f">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">file</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">Path</span>(<span style="color: #CE9178;">'../resources/wholesale_customers.csv'</span>)
+<span style="color: #9CDCFE;">df</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #ded492;">read_csv</span>(file)
+<span style="color: #C586C0;">print</span>(df.<span style="color: #ded492;">sample</span>(<span style="color: #BBCCAA;">5</span>))
+</pre>
+</div>
+
+<pre class="example" id="org357318d">
+     Channel  Region  Fresh   Milk  Grocery  Frozen  Detergents_Paper  Delicassen
+253        1       1  29526   7961    16966     432               363        1391
+68         1       3   2446   7260     3993    5870               788        3095
+276        1       3  27901   3749     6964    4479               603        2503
+359        1       3    796   5878     2109     340               232         776
+46         2       3   3103  14069    21955    1668              6792        1452
+</pre>
+
+<div class="src-name" id="org7681582">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">normalized</span> <span style="color: #e0e0e0;">=</span> <span style="color: #ded492;">normalize</span>(df)
+<span style="color: #C586C0;">print</span>(normalized[:<span style="color: #BBCCAA;">5</span>])
+</pre>
+</div>
+
+<pre class="example" id="org067eaab">
+[[1.11821406e-04 1.67732109e-04 7.08332695e-01 5.39873747e-01
+  4.22740825e-01 1.19648904e-02 1.49505220e-01 7.48085205e-02]
+ [1.25321880e-04 1.87982820e-04 4.42198253e-01 6.14703821e-01
+  5.99539873e-01 1.10408576e-01 2.06342475e-01 1.11285829e-01]
+ [1.24839188e-04 1.87258782e-04 3.96551681e-01 5.49791784e-01
+  4.79632161e-01 1.50119124e-01 2.19467293e-01 4.89619296e-01]
+ [6.45937822e-05 1.93781347e-04 8.56836521e-01 7.72541635e-02
+  2.72650355e-01 4.13658581e-01 3.27490476e-02 1.15493683e-01]
+ [7.91877886e-05 1.18781683e-04 8.95415919e-01 2.14202968e-01
+  2.84996851e-01 1.55010096e-01 7.03583502e-02 2.05294342e-01]]
+</pre>
+</div>
+</div>
+
+<div id="outline-container-create-the-dendogram" class="outline-3">
+<h3 id="create-the-dendogram"><span class="section-number-3">9.3.</span> Create the Dendogram</h3>
+<div class="outline-text-3" id="text-create-the-dendogram">
+<p>
+We will create our mergings first, then use the <code>dendrogram</code> function from <code>scipy</code> to create the dendogram.
+</p>
+
+<div class="src-name" id="org768d6bf">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">file</span> <span style="color: #e0e0e0;">=</span> <span style="color: #CE9178;">"../resources/dendrogram1.png"</span>
+
+<span style="color: #9CDCFE;">mergings</span> <span style="color: #e0e0e0;">=</span> <span style="color: #ded492;">linkage</span>(normalized, <span style="color: #9CDCFE;">method</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">'ward'</span>)
+plt.<span style="color: #ded492;">figure</span>(<span style="color: #9CDCFE;">figsize</span><span style="color: #e0e0e0;">=</span>(<span style="color: #BBCCAA;">10</span>, <span style="color: #BBCCAA;">4</span>))
+
+<span style="color: #ded492;">dendrogram</span>(
+    mergings,
+    <span style="color: #9CDCFE;">leaf_rotation</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">90</span>,
+    <span style="color: #9CDCFE;">leaf_font_size</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">5</span>
+)
+plt.<span style="color: #ded492;">savefig</span>(file)
+
+<span style="color: #C586C0;">print</span>(file)
+</pre>
+</div>
+
+<div class="org" id="org42c6653">
+
+<div id="org865abca" class="figure">
+<p><img src="../resources/dendrogram1.png" alt="dendrogram1.png" />
+</p>
+</div>
+
+</div>
+
+<p>
+<b>Note</b> that we have way too many cases which results in way too many branches. So we must map everything into 4 clusters to get a better visualization result.
+</p>
+</div>
+</div>
+
+<div id="outline-container-remap-observations-into-clusters" class="outline-3">
+<h3 id="remap-observations-into-clusters"><span class="section-number-3">9.4.</span> Remap Observations into Clusters</h3>
+<div class="outline-text-3" id="text-remap-observations-into-clusters">
+<div class="src-name" id="orgc714dd3">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">df2</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">pd</span>.<span style="color: #4EC9B0;">DataFrame</span>(normalized)
+df2.<span style="color: #9CDCFE;">columns</span> <span style="color: #e0e0e0;">=</span> df.<span style="color: #9CDCFE;">columns</span>
+
+<span style="color: #9CDCFE;">model</span> <span style="color: #e0e0e0;">=</span> <span style="color: #4EC9B0;">AgglomerativeClustering</span>(
+    <span style="color: #9CDCFE;">n_clusters</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">4</span>,
+    <span style="color: #9CDCFE;">affinity</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">'euclidean'</span>,
+    <span style="color: #9CDCFE;">linkage</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">'ward'</span>
+)
+<span style="color: #9CDCFE;">labels</span> <span style="color: #e0e0e0;">=</span> model.<span style="color: #ded492;">fit_predict</span>(df)
+<span style="color: #C586C0;">print</span>(labels[:<span style="color: #BBCCAA;">10</span>])
+</pre>
+</div>
+
+<pre class="example" id="org80fee38">
+[2 2 2 2 3 2 2 2 2 0]
+</pre>
+</div>
+</div>
+
+<div id="outline-container-run-the-dendogram-again" class="outline-3">
+<h3 id="run-the-dendogram-again"><span class="section-number-3">9.5.</span> Run the Dendogram Again</h3>
+<div class="outline-text-3" id="text-run-the-dendogram-again">
+<p>
+We will use the <code>labels</code> argument of the dendrogram function and pass the <code>labels</code> as a numpy array.
+</p>
+
+<div class="src-name" id="orgc999db8">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">file</span> <span style="color: #e0e0e0;">=</span> <span style="color: #CE9178;">"../resources/dendrogram2.png"</span>
+
+<span style="color: #9CDCFE;">mergings</span> <span style="color: #e0e0e0;">=</span> <span style="color: #ded492;">linkage</span>(normalized, <span style="color: #9CDCFE;">method</span><span style="color: #e0e0e0;">=</span><span style="color: #CE9178;">'ward'</span>)
+
+plt.<span style="color: #ded492;">figure</span>(<span style="color: #9CDCFE;">figsize</span><span style="color: #e0e0e0;">=</span>(<span style="color: #BBCCAA;">10</span>, <span style="color: #BBCCAA;">4</span>))
+<span style="color: #ded492;">dendrogram</span>(
+    mergings,
+    <span style="color: #9CDCFE;">labels</span><span style="color: #e0e0e0;">=</span><span style="color: #4EC9B0;">np</span>.<span style="color: #ded492;">array</span>(labels),
+    <span style="color: #9CDCFE;">leaf_rotation</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">90</span>,
+    <span style="color: #9CDCFE;">leaf_font_size</span><span style="color: #e0e0e0;">=</span><span style="color: #BBCCAA;">5</span>
+)
+plt.<span style="color: #ded492;">savefig</span>(file)
+
+<span style="color: #C586C0;">print</span>(file)
+</pre>
+</div>
+
+<div class="org" id="org3b262a9">
+
+<div id="org170aeb6" class="figure">
+<p><img src="../resources/dendrogram2.png" alt="dendrogram2.png" />
+</p>
+</div>
+
+</div>
+
+<p>
+We can see a few groups from the dendrogram but we can also try to visualize it in a 2d plane as we&rsquo;ve before, then find similarities between them.
+</p>
+
+<div class="src-name" id="org8443ff1">
+<p>
+
+</p>
+
+</div>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #9CDCFE;">file</span> <span style="color: #e0e0e0;">=</span> <span style="color: #CE9178;">"../resources/dendro_clusters2d.png"</span>
+
+plt.<span style="color: #ded492;">figure</span>(<span style="color: #9CDCFE;">figsize</span><span style="color: #e0e0e0;">=</span>(<span style="color: #BBCCAA;">5</span>, <span style="color: #BBCCAA;">4</span>))
+
+plt.<span style="color: #ded492;">scatter</span>(df2[<span style="color: #CE9178;">'Grocery'</span>], df2[<span style="color: #CE9178;">'Fresh'</span>], <span style="color: #9CDCFE;">c</span><span style="color: #e0e0e0;">=</span>labels)
+
+plt.<span style="color: #ded492;">savefig</span>(file)
+<span style="color: #C586C0;">print</span>(file)
+</pre>
+</div>
+
+<div class="org" id="org5513279">
+
+<div id="org8d9c97d" class="figure">
+<p><img src="../resources/dendro_clusters2d.png" alt="dendro_clusters2d.png" />
+</p>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Alberto Valdez</p>
+<p class="date">Created: 2022-11-03 Thu 17:10</p>
+</div>
+</body>
+</html>
