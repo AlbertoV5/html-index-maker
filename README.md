@@ -21,3 +21,8 @@ This will call the module on the resources directory, look for html files and st
 - JS
 - ORG
 - MARKDOWN
+
+## Changelog
+
+- 0.1.1 Added support for org, js, md, fixes.
+- 0.1.0 Initial Version

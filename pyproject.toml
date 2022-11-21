@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "html-index-maker"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["AlbertoV5 <58243333+AlbertoV5@users.noreply.github.com>"]
 license = "MIT"
 readme = "README.md"
 packages = [{include = "html-index-maker", from = "src"}]
+repository = "https://github.com/AlbertoV5/html-index-maker"
 
 [tool.poetry.dependencies]
 python = "^3.7"
