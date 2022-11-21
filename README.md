@@ -5,5 +5,5 @@ Scrape local HTML files and generate an index.
 ## Usage
 
 ```shell
-python -m html-index-maker ./resources ./data.json
+python -m html-index-maker ./resources -o ./data.json
 ```

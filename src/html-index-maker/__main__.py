@@ -27,5 +27,7 @@ def main(argv: Arguments):
 if __name__ == "__main__":
     args = ArgumentParser()
     args.add_argument("filepath", help="File path or directory to scrape.")
-    args.add_argument("--outpath", help="Output JSON file path.", default="./data.json")
+    args.add_argument(
+        "--outpath", "-o", help="Output JSON file path.", default="./data.json"
+    )
     main(args.parse_args())
