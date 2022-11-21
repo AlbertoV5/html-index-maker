@@ -1,0 +1,1660 @@
+#+title: Supervised Machine Learning
+#+subtitle: Automating Decision Making
+#+author: Alberto Valdez
+#+SETUPFILE: ../config/org-theme-alt.config
+#+SETUPFILE: ../config/org-header.config
+# https://www.cs.princeton.edu/courses/archive/spr10/cos433/Latex/latex-guide.pdf
+
+* Machine Learning
+:PROPERTIES:
+:CUSTOM_ID: machine-learning
+:END:
+
+Machine Learning can be found almost everywhere in the modern tech world.
+
+We have different types of analytics: reporting, analysis and prediction. *Reporting* includes spreadsheets and simple measurements. *Analysis* includes exploratory analysis, visualization, data transformation, generate new data, etc. Then *Prediction* includes dealing with data that is not there but we can assume it fits a model, forecasting, enrich datasets, make decisions. We can do two types of prediction, either values (continuous data) or categories (categorical data).
+
+Machine Learning algorithms are functions with internal parameters that apply labels to data points. They are able to model our decision making process. The simplest ML model is linear regression, where the parameters use the =m= and =b= variables from the line equation.
+
+ML is executed with a different approach, as we use many observations to build the algorithm (training data). By using hundreds to millions of observations, we can get a better view on how we can model the behaviour of real-world scenarios.
+
+In order to learn, the algorithm receives a lots of inputs with the correct answers as well as the incorrect answers, both labeled appropriately.
+
+Supervised learning knows the correct and incorrect answers to the input data. We will have a target variable for the algorithm to optimize on (we know the outcome in advance).
+
+Unsupervised learning doesn't have the answers so it will cluster the data in different groups by looking for patterns, so the data scientist must assign labels manually.
+
+With reinforcement learning we have a small amount of observations, but we use the outcome from the same model to create more input data. For example, a robot using failed attempts at opening a door and collecting the parameters for those attemps, whenever one is successful, then it will store it and be the first to try in the future.
+
+In classification (unsupervised) we look to divide the data into groups. In regression (supervised) we look for a line that sits as close to all observations as possible. They are basically the same problem but with the opposite optimization.
+
+** Supervised Learning
+:PROPERTIES:
+:CUSTOM_ID: supervised-learning
+:END:
+
+The Model-Fit-Predict paradigm is:
+
+1. Choosing a model
+2. Fit (train)
+3. Predict
+
+This model is stored as a procedure so you can give it unknown data and get a result immediatly.
+
+When validating, we use data that the model doesn't know about, so we can verify the validity of the results from the training. Then we assess the model by looking at different measures from the test.
+
+The independent variables are features and the dependent variable is called target.
+
+** Linear regression
+:PROPERTIES:
+:CUSTOM_ID: linear-regression
+:END:
+
+Linear regression is the simplest model while still being powerful.
+
+We use the m and b in the equation of the line as the features for our model.
+
+y = B0 + B1x
+
+Linear data can have the following trends:
+
+1. Positive trend
+2. Negative trend
+3. No trend: we have to use a different algorithm
+
+The algorithm measures distances and minimizes different distances between our current line and the observation. In case of many datapoints, the algorithm will optimize for the smaller distance for all the observations.
+
+* Scikit-learn
+:PROPERTIES:
+:CUSTOM_ID: scikit-learn
+:END:
+
+Scikit-learn provides the models for us. We just have to follow the model-fit-predict paradigm.
+
+We will start importing a dataset from sklearn.
+
+#+begin_src python
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from pathlib import Path
+from sklearn.datasets import make_regression
+
+
+X, y = make_regression(
+    n_samples=20,
+    n_features=1,
+    random_state=0,
+    noise=4,
+    bias=100.0,
+)
+resources = Path('../resources')
+#+end_src
+
+#+RESULTS[60aaefb0be34bd1b27b29e69bc8a9465ddcdd457]:
+#+begin_example
+#+end_example
+
+Plot the data.
+
+#+begin_src python :wrap org
+output = resources / "dataset1.png"
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.scatter(X, y)
+fig.savefig(output)
+print("#+attr_html: :width 500px")
+print(f"[[{output}]]")
+#+end_src
+
+#+RESULTS[452a4ca29f608fbe91b8c885fcee0371746e28b7]:
+#+begin_org
+#+attr_html: :width 500px
+[[../resources/dataset1.png]]
+#+end_org
+
+Now we can import the model from sklearn.
+
+#+begin_src python
+from sklearn.linear_model import LinearRegression
+
+model = LinearRegression()
+#+end_src
+
+#+RESULTS[d7ccd722f2b1397e4f91605c5e991299d1e4e61c]:
+#+begin_example
+#+end_example
+
+Then we fit the data (training in one step).
+
+#+begin_src python
+model.fit(X, y)
+print(model.coef_)
+print(model.intercept_)
+#+end_src
+
+#+RESULTS[516ee4e2743b01ff48043580441ce16a3f70e7f9]:
+#+begin_example
+[12.44002424]
+101.89622505659258
+#+end_example
+
+Then we make a prediction.
+
+#+begin_src python
+predictions = model.predict(X)
+print(predictions)
+#+end_src
+
+#+RESULTS[2e5642b913305fbf8dbf9c767a2f6da0f960a179]:
+#+begin_example
+[100.01333772 106.87419043 114.0717493   91.27125336  89.73886454
+ 105.79079485 100.61218004  99.34405128 106.04714178 120.48260494
+ 113.715348   103.40986521 119.98742273 125.12869172 103.68813057
+ 107.00408037 111.3635528  129.77299077 107.41789443 123.841079  ]
+#+end_example
+
+Then we can compare our prediction with the real data.
+
+#+begin_src python
+df = pd.DataFrame({
+    "predicted": predictions,
+    "real": y,
+    "error": predictions - y
+})
+print(df)
+#+end_src
+
+#+RESULTS[99aa2363f0c2abc41c0ea813cbee5ba122c198c0]:
+#+begin_example
+     predicted        real     error
+0   100.013338   98.019704  1.993634
+1   106.874190  108.458654 -1.584464
+2   114.071749  107.776544  6.295205
+3    91.271253   90.315201  0.956053
+4    89.738865   92.047965 -2.309101
+5   105.790795  100.144726  5.646069
+6   100.612180  104.371286 -3.759106
+7    99.344051   95.208967  4.135085
+8   106.047142  102.505262  3.541880
+9   120.482605  122.119661 -1.637056
+10  113.715348  112.287600  1.427748
+11  103.409865  107.326140 -3.916275
+12  119.987423  121.444549 -1.457126
+13  125.128692  125.803460 -0.674768
+14  103.688131  104.330672 -0.642542
+15  107.004080  112.026181 -5.022101
+16  111.363553  106.596614  4.766939
+17  129.772991  129.857150 -0.084159
+18  107.417894  113.512862 -6.094967
+19  123.841079  125.422026 -1.580947
+#+end_example
+
+Now we can construct our line for plotting.
+
+#+begin_src python :wrap org
+output = resources / "linear2.png"
+x_min = X.min()
+x_max = X.max()
+y_min = model.predict([[x_min]])
+y_max = model.predict([[x_max]])
+
+fig, ax = plt.subplots()
+
+ax.scatter(X, y)
+ax.plot([x_min, x_max], [y_min, y_max], c='red')
+fig.savefig(output)
+print("#+attr_html: :width 500px")
+print(f"[[{output}]]")
+#+end_src
+
+#+RESULTS[3d75c9e36546c09bb661a19588477406f6d3f107]:
+#+begin_org
+#+attr_html: :width 500px
+[[../resources/linear2.png]]
+#+end_org
+
+** Univariate Linear Regression
+:PROPERTIES:
+:CUSTOM_ID: univariate-linear-regression
+:END:
+
+If we have many intercepts and features, we will get different coefficients.
+
+The residuals are the differences between the true values of y and the predicted values of y. The problem is that it is scale-dependent.
+
+We can look at the residuals to see how wrong we are.
+
+#+begin_src python :wrap org
+predictions = model.predict(X)
+
+output = resources / "residuals.png"
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.scatter(predictions, predictions - y)
+plt.hlines(y=0, xmin=predictions.min(), xmax=predictions.max())
+
+fig.savefig(output)
+print("#+attr_html: :width 500px")
+print(f"[[{output}]]")
+#+end_src
+
+#+RESULTS[e529a983b84eaca28cbfe7ff255b12355beb0bcf]:
+#+begin_org
+#+attr_html: :width 500px
+[[../resources/residuals.png]]
+#+end_org
+
+We want the residuals to have a nice behaviour, which means that we want values underneath and on top (distributed similarly). This means that the linear regression is not underestimating or underestimating values.
+
+The *r-squared* tells us to which degree we have been able to explain the variance of the target variable using the features. A high *r-square* means that the model explains the relationship very well.
+
+The *mean squared error* measures the average of the squares of the errors or deviations (scale-dependent).
+
+** Quantifying Regression
+:PROPERTIES:
+:CUSTOM_ID: quantifying-regression
+:END:
+
+We will import our dataset. We can use the metrics library from sklearn to get measurements on our model and build the predictions. Then create a linear regression model.
+
+#+begin_src python
+# Import dependencies
+from sklearn.datasets import make_regression
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Generate some data
+X, y = make_regression(n_samples=20, n_features=1, random_state=0, noise=4, bias=100.0)
+model = LinearRegression()
+model.fit(X, y)
+predicted = model.predict(X)
+#+end_src
+
+#+RESULTS[eec1cec5df77b340ecd912465d123c3c9ada3406]:
+#+begin_example
+#+end_example
+
+Get the r-squared of our regression as well as the mean-squared error. The noisier the data, the lower the r2 value will be, the more samples, the better the r2 will be.
+
+#+begin_src python
+r2 = r2_score(y, predicted)
+mse = mean_squared_error(y, predicted)
+print("r-squared:", r2)
+print("mean-squared error:", mse)
+#+end_src
+
+#+RESULTS[fb0a8fbfb226c75f195020de4d7cc8c04c2d37b8]:
+#+begin_example
+r-squared: 0.903603363418708
+mean-squared error: 11.933040779746149
+#+end_example
+
+If we change to a noisier set, we get different results.
+
+#+begin_src python
+X, y = make_regression(n_samples=20, n_features=1, random_state=0, noise=12, bias=100.0)
+model = LinearRegression()
+model.fit(X, y)
+predicted = model.predict(X)
+r2 = r2_score(y, predicted)
+mse = mean_squared_error(y, predicted)
+print("r-squared:", r2)
+print("mean-squared error:", mse)
+#+end_src
+
+#+RESULTS[5b92c77b6cdbd216a0f54bc0d7cd0cea1ff63e62]:
+#+begin_example
+r-squared: 0.3348878392803907
+mean-squared error: 107.39736701771537
+#+end_example
+
+** Improving Model with Tests
+:PROPERTIES:
+:CUSTOM_ID: improving-model-with-tests
+:END:
+
+We can split the dataset with sklearn, which results in a 3 to 1 learn-test data.
+
+#+begin_src python
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    random_state=42,
+)
+print(y.size)
+print(y_test.size)
+print(y_train.size)
+#+end_src
+
+#+RESULTS[12e9e82e9ff5d461d4ba65ab81a6b9931f137cb7]:
+#+begin_example
+20
+5
+15
+#+end_example
+
+We have learned with a different dataset than the testing, one the resulting score is the *r-squared*.
+
+#+begin_src python
+model.fit(X_train, y_train)
+score = model.score(X_test, y_test)
+print(score)
+#+end_src
+
+#+RESULTS[406cdcd815c8956ef868a87d955fd617ba9cadff]:
+#+begin_example
+0.4351627840398349
+#+end_example
+
+If we test the model, and the result is good, we can trust it can keep performing well in new observations.
+
+* Linear Regression Example
+:PROPERTIES:
+:CUSTOM_ID: linear-regression-example
+:END:
+
+** Load the Data
+:PROPERTIES:
+:CUSTOM_ID: load-the-data
+:END:
+
+#+begin_src python
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+brains = pd.read_csv('../resources/brain.csv')
+print(brains.head())
+#+end_src
+
+#+RESULTS[7cccc192a686a61cb96249af9162174215d0d962]:
+#+begin_example
+   gender  age  size  weight
+0       1    1  4512    1530
+1       1    1  3738    1297
+2       1    1  4261    1335
+3       1    1  3777    1282
+4       1    1  4177    1590
+#+end_example
+
+** Assign the data to X and y
+:PROPERTIES:
+:CUSTOM_ID: assign-the-data-to-x-and-y
+:END:
+
+#+begin_src python
+X = brains["weight"].values.reshape(-1, 1)
+y = brains["size"].values.reshape(-1, 1)
+
+print("Shape: ", X.shape, y.shape)
+#+end_src
+
+#+RESULTS[acfbf57f94ef55854cad4d1cb4d0e015d176e9f2]:
+#+begin_example
+Shape:  (237, 1) (237, 1)
+#+end_example
+
+** Plot the data
+:PROPERTIES:
+:CUSTOM_ID: plot-the-data
+:END:
+
+#+begin_src python :wrap org
+output = resources / "brain.png"
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.scatter(X, y)
+ax.set_xlabel("weight of the brain")
+ax.set_ylabel("size of the head")
+fig.savefig(output)
+
+print("#+attr_html: :width 500px")
+print(f"[[{output}]]")
+#+end_src
+
+#+RESULTS[57ac316afd92bb2841de6692f0b3fc3d7316e826]:
+#+begin_org
+#+attr_html: :width 500px
+[[../resources/brain.png]]
+#+end_org
+
+** Split Learn and Test data
+:PROPERTIES:
+:CUSTOM_ID: split-learn-and-test-data
+:END:
+
+#+begin_src python
+from sklearn.model_selection import train_test_split
+X_learn, X_test, y_learn, y_test = train_test_split(X, y, random_state=42)
+print(X_learn.size)
+print(X_test.size)
+print(y_learn.size)
+print(y_test.size)
+#+end_src
+
+#+RESULTS[8060346e441ad2d37580e3771aedb25a827aba63]:
+#+begin_example
+177
+60
+177
+60
+#+end_example
+
+** Create and Fit the Model
+:PROPERTIES:
+:CUSTOM_ID: create-and-fit-the-model
+:END:
+
+#+begin_src python
+from sklearn.linear_model import LinearRegression
+
+model = LinearRegression()
+model.fit(X_learn, y_learn)
+print(model.coef_)
+#+end_src
+
+#+RESULTS[15751c258013f2ed20a534e677be9ea140ee0e9c]:
+#+begin_example
+[[2.35989976]]
+#+end_example
+
+** Calculate MSE and R2
+:PROPERTIES:
+:CUSTOM_ID: calculate-mse-and-r2
+:END:
+
+Mean-squared error and r-squared. Using the original dataset, not split in learn-test.
+
+#+begin_src python
+from sklearn.metrics import mean_squared_error, r2_score
+
+predicted = model.predict(X)
+r2 = r2_score(y, predicted)
+mse = mean_squared_error(y, predicted)
+print("r-squared:", r2)
+print("mean-squared error:", mse)
+#+end_src
+
+#+RESULTS[6858cc801061099ca12610d965e5479dab7a93c8]:
+#+begin_example
+r-squared: 0.6384806219470258
+mean-squared error: 48028.923228939115
+#+end_example
+
+** Calculate R2 Score
+:PROPERTIES:
+:CUSTOM_ID: calculate-r2-score
+:END:
+
+Calculate r-squared.
+
+#+begin_src python
+score = model.score(X_test, y_test)
+print(score)
+#+end_src
+
+#+RESULTS[353bc2118b90b9a838b2e734060d0c96d0479497]:
+#+begin_example
+0.6568088729208812
+#+end_example
+
+** Conclusion
+:PROPERTIES:
+:CUSTOM_ID: conclusion
+:END:
+
+The r-squared is too low so we can't trust this model in the future.
+
+#+begin_src python :wrap org
+y_pred = model.predict(X)
+output = resources / "example2lin.png"
+fig, ax = plt.subplots(figsize=(8, 5))
+# using the model data
+ax.scatter(X, y)
+ax.plot(X, y_pred, color='red')
+fig.savefig(output)
+print("#+attr_html: :width 500px")
+print(f"[[{output}]]")
+#+end_src
+
+#+RESULTS[01d07b60ed936af015aeac39564388ccdf288db3]:
+#+begin_org
+#+attr_html: :width 500px
+[[../resources/example2lin.png]]
+#+end_org
+
+
+* Logistic Regression
+:PROPERTIES:
+:CUSTOM_ID: logistic-regression
+:END:
+
+Logistic regression is a classification algorithm used to discrete set of classes or categories (for example Yes/No, True/False, etc).
+
+We use it as an activation function, so we set a threshold, whichever passes it will be the positive category and whichever doesn't will be part of the negative category (1 and 0 respectively).
+
+We will find the hyperplane that is the farthest away from both groups.
+
+** Logistic regression in python
+:PROPERTIES:
+:CUSTOM_ID: logistic-regression-in-python
+:END:
+
+#+begin_src python
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.datasets import make_blobs
+
+X, y = make_blobs(centers=2, random_state=42)
+print(f"Labels: {y[:10]}")
+print(f"Data: {X[:10]}")
+#+end_src
+
+#+RESULTS[1cd8153e781b680b6a6e0f283838799225257ba5]:
+#+begin_example
+Labels: [0 1 0 1 1 0 1 1 0 0]
+Data: [[-2.98837186  8.82862715]
+ [ 5.72293008  3.02697174]
+ [-3.05358035  9.12520872]
+ [ 5.461939    3.86996267]
+ [ 4.86733877  3.28031244]
+ [-2.14780202 10.55232269]
+ [ 4.91656964  2.80035293]
+ [ 3.08921541  2.04173266]
+ [-2.90130578  7.55077118]
+ [-3.34841515  8.70507375]]
+#+end_example
+
+#+begin_src python :wrap org
+output = resources / "logistic1.png"
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.scatter(X[:, 0], X[:, 1], c=y)
+fig.savefig(output)
+print("#+attr_html: :width 500px")
+print(f"[[{output}]]")
+#+end_src
+
+#+RESULTS[377da6e75f04ad0feceb24a1e38b8ba9ea74bfbb]:
+#+begin_org
+#+attr_html: :width 500px
+[[../resources/logistic1.png]]
+#+end_org
+
+We split the data.
+
+#+begin_src python
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    random_state=1,
+    stratify=y
+)
+print(X_train.size)
+print(X_test.size)
+#+end_src
+
+#+RESULTS[f62b1607ebd3eff005e9a056a7b9ffc9e872e87c]:
+#+begin_example
+150
+50
+#+end_example
+
+We create a classifier with the logistic regression model.
+
+#+begin_src python
+from sklearn.linear_model import LogisticRegression
+
+classifier = LogisticRegression(
+    solver='lbfgs',
+    random_state=1
+)
+classifier.fit(X_train, y_train)
+score = classifier.score(X_test, y_test)
+print(score)
+#+end_src
+
+#+RESULTS[a3f5d78bed4b00e11dd774d66a5e2f4880c17990]:
+#+begin_example
+LogisticRegression(random_state=1)
+1.0
+#+end_example
+
+Instead of building a line that can be represented a line with an intercept and a slope, we use it as a part of a logistic activation function. It finds a space between the classes and allows us to separate them.
+
+If we introduce new data we can get a classification for it.
+
+#+begin_src python :wrap org
+new_data = np.array([[2, 6]])
+output = resources / "logistic2.png"
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.scatter(X[:, 0], X[:, 1], c=y)
+ax.scatter(new_data[0, 0], new_data[0, 1], c="r", marker="o", s=100)
+fig.savefig(output)
+
+print("#+attr_html: :width 500px")
+print(f"[[{output}]]")
+#+end_src
+
+#+RESULTS[924250993deb2f4ac0c2460104d3d573ca76c3f1]:
+#+begin_org
+#+attr_html: :width 500px
+[[../resources/logistic2.png]]
+#+end_org
+
+So if we evaluate the new observation, we would expect to fit one of the classes.
+
+#+begin_src python
+predictions = classifier.predict(new_data)
+print(f"The new point was classified as: {predictions}")
+#+end_src
+
+#+RESULTS[ca132203b17feef72fe847a1beab6dd6bacc06a3]:
+#+begin_example
+The new point was classified as: [1]
+#+end_example
+
+* Logistic Regression Example
+:PROPERTIES:
+:CUSTOM_ID: logistic-regression-example
+:END:
+
+** Imports
+:PROPERTIES:
+:CUSTOM_ID: imports
+:END:
+
+#+begin_src python :exports code
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+
+from joblib import dump, load
+#+end_src
+
+#+RESULTS[aa9bdd2d8415aeffd6d6e78c7b461d1a3fafc939]:
+#+begin_example
+#+end_example
+
+** Load the data
+:PROPERTIES:
+:CUSTOM_ID: load-the-data
+:END:
+
+#+begin_src python
+notes = pd.read_csv('../resources/data_banknote_authentication.csv', header=None, names=['variance','skewness','curtosis', 'entropy', 'class'])
+print(notes.head())
+#+end_src
+
+#+RESULTS[8f5e6726ec31ba9816b74a46dd15191239f3082e]:
+#+begin_example
+   variance  skewness  curtosis  entropy  class
+0   3.62160    8.6661   -2.8073 -0.44699      0
+1   4.54590    8.1674   -2.4586 -1.46210      0
+2   3.86600   -2.6383    1.9242  0.10645      0
+3   3.45660    9.5228   -4.0112 -3.59440      0
+4   0.32924   -4.4552    4.5718 -0.98880      0
+#+end_example
+
+** Assign data
+:PROPERTIES:
+:CUSTOM_ID: assign-data
+:END:
+
+#+begin_src python
+y = notes["class"]
+X = notes.drop(columns="class")
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    random_state=1,
+    stratify=y
+)
+print(X_train.shape, X_test.shape)
+#+end_src
+
+#+RESULTS[1bad1c89514d202b7e442c6b07b355a89bb51b42]:
+#+begin_example
+(1029, 4) (343, 4)
+#+end_example
+
+** Init and train the data
+:PROPERTIES:
+:CUSTOM_ID: init-and-train-the-data
+:END:
+
+#+begin_src python
+classifier = LogisticRegression(
+    solver='lbfgs',
+    max_iter=200, # upper limit of num of iter solver
+    random_state=1
+)
+classifier.fit(X_train, y_train)
+print(classifier)
+#+end_src
+
+#+RESULTS[3d5bfe353cc20f307c18bfa1bc5e8f0055e98dbe]:
+#+begin_example
+LogisticRegression(max_iter=200, random_state=1)
+#+end_example
+
+** Make predictions
+:PROPERTIES:
+:CUSTOM_ID: make-predictions
+:END:
+
+#+begin_src python
+y_pred = classifier.predict(X_test)
+results = pd.DataFrame({"Prediction": y_pred, "Actual": y_test}).reset_index(drop=True)
+print(results.head())
+#+end_src
+
+#+RESULTS[8e88a27d819a8fc6d7d4f09059828f218982a322]:
+#+begin_example
+   Prediction  Actual
+0           0       0
+1           0       0
+2           1       1
+3           0       0
+4           0       0
+#+end_example
+
+** Evaluate model
+:PROPERTIES:
+:CUSTOM_ID: evaluate-model
+:END:
+
+#+begin_src python
+train_score = classifier.score(X_train, y_train)
+test_score = classifier.score(X_test, y_test)
+print("train score:", train_score)
+print("test score:", test_score)
+#+end_src
+
+#+RESULTS[5ad21155164da01afe8a5078a41ae07c5a778609]:
+#+begin_example
+train score: 0.9883381924198251
+test score: 0.9941690962099126
+#+end_example
+
+** Storing the Model
+:PROPERTIES:
+:CUSTOM_ID: storing-the-model
+:END:
+
+We can save the trained model for later.
+
+#+begin_src python :exports code
+dump(classifier, 'model.joblib')
+#+end_src
+
+#+RESULTS[d852728c8d726671b14209027fb35ea8075c519e]:
+#+begin_example
+#+end_example
+
+** Reloading the Model
+:PROPERTIES:
+:CUSTOM_ID: reloading-the-model
+:END:
+
+If we reload the model, we don't have to train it, we shouldn't. So we load new data and create a prediction with the model.
+
+#+begin_src python
+model2 = load('model.joblib')
+new_data = pd.DataFrame(
+    {
+        "variance": 3,
+        "skewness": 2,
+        "curtosis": 1,
+        "entropy": 0
+    },
+    index = [0]
+)
+predictions = model2.predict(new_data)
+print(f"The new point was classified as: {predictions}")
+#+end_src
+
+#+RESULTS[943ce0efc30d4181aee19eb7b57ca7b3b9fca3bc]:
+#+begin_example
+The new point was classified as: [0]
+#+end_example
+
+
+* Confusion Matrix
+:PROPERTIES:
+:CUSTOM_ID: confusion-matrix
+:END:
+
+** Measuring Accuracy
+:PROPERTIES:
+:CUSTOM_ID: measuring-accuracy
+:END:
+
+The confusion Matrix will tell us how many times our model was able to predict correct observations, this gives us other important measurements like *sensitivity* that we need to consider while evaluating the models.
+
+|                | Predicted True       | Predicted False      |
+| Actually True  | 128 (True Positives) | 5 (False Negatives)  |
+| Actually False | 6 (False Positives)  | 111 (True Negatives) |
+
+We build confusion matrices on *test* data.
+
+1. True or False means that our model and the actual result is what we expected or not.
+2. Positive and Negative refers to the category that the model gave out
+
+|                | Predicted True | Predicted False |
+|----------------+----------------+-----------------|
+| Actually True  | TRUE POSITIVE  | FALSE NEGATIVE  |
+| Actually False | FALSE POSITIVE | TRUE NEGATIVE
+
+*** Accuracy
+:PROPERTIES:
+:CUSTOM_ID: accuracy
+:END:
+
+Accuracy is the number of correct predictions against the total number of predictions.
+
+\begin{equation}
+Accuracy = \frac{TP + TN}{TP + TN + FP + FN}
+\end{equation}
+
+*** Precision
+:PROPERTIES:
+:CUSTOM_ID: precision
+:END:
+
+Precision is the measure of how likely is that the prediction is actually true. It tells us the percentage of positive predictions that are correct, how precise a positive prediction is.
+
+\begin{equation}
+Precision = \frac{TP}{TP + FP}
+\end{equation}
+
+*** Sensitivity
+:PROPERTIES:
+:CUSTOM_ID: sensitivity
+:END:
+
+Sensitivity is the capability of the model of understanding to which category the data corresponds.
+
+\begin{equation}
+Sensitivity = \frac{TP}{TP + FN}
+\end{equation}
+
+** Confusion Matrix in Python
+:PROPERTIES:
+:CUSTOM_ID: confusion-matrix-in-python
+:END:
+
+#+begin_src python
+from sklearn.metrics import confusion_matrix, classification_report
+
+matrix = confusion_matrix(y_test, y_pred)
+true_positive = tp = matrix[0][0]
+false_negative = fn = matrix[0][1]
+false_positive = fp = matrix[1][0]
+true_negative = tn = matrix[1][1]
+print(matrix)
+#+end_src
+
+#+RESULTS[d9bf841f97476bc75f5b90ffac6617565b68b17b]:
+#+begin_example
+[[189   1]
+ [  1 152]]
+#+end_example
+
+Then we can calculate the accuracy and sensitivity.
+
+#+begin_src python
+print("accuracy:", (tp + tn) / (tp + fn + tn + fp))
+print("sensitivity:", tp / (tp + fp))
+#+end_src
+
+#+RESULTS[8ae252c79d29a47ef2ef0186dc4e0149f07235e1]:
+#+begin_example
+accuracy: 0.9941690962099126
+sensitivity: 0.9947368421052631
+#+end_example
+
+Then we can generate a classification report.
+
+#+begin_src python
+report = classification_report(y_test, y_pred)
+print(report)
+#+end_src
+
+#+RESULTS[f87f95e97f6efd6b6b6117b9545a6f84d8be9fad]:
+#+begin_example
+              precision    recall  f1-score   support
+
+           0       0.99      0.99      0.99       190
+           1       0.99      0.99      0.99       153
+
+    accuracy                           0.99       343
+   macro avg       0.99      0.99      0.99       343
+weighted avg       0.99      0.99      0.99       343
+#+end_example
+
+* Support Vector Machine
+:PROPERTIES:
+:CUSTOM_ID: support-vector-machine
+:END:
+
+Support Vector Machines (SVMs) are binary classifiers. It is similar to logistic regression, however, the goal of SVM is to find a line that separates the data into two classes. SVM draws a line at the edge of each class, and attempts to maximize the distance between them. It does so by separating the data points with the largest possible margins.
+
+The hyperplanes need the widest equidistant margins possible. This improves classification predictions. The width of the margin is considered the margin of separation.
+
+Support vectors are the data points closest to the hyperplane. They serve as decision boundaries for classification.
+
+However, when there is an outlier, we can use soft margins to accomodate them, as they allow SVMs to make allowances.
+
+In a 3D plane, the hyperplane would need to consider the another dimension to separate the both classes.
+
+** SVMs in practice
+:PROPERTIES:
+:CUSTOM_ID: svms-in-practice
+:END:
+
+We are going to start with a model that has already been scaled.
+
+#+begin_src python
+data = Path('../resources/loans.csv')
+df = pd.read_csv(data)
+print(df.head())
+#+end_src
+
+#+RESULTS[c76bdcf658559b373c4cd36190c299fbecb43ce7]:
+#+begin_example
+     assets  liabilities  ...  mortgage   status
+0  0.210859     0.452865  ...  0.302682     deny
+1  0.395018     0.661153  ...  0.502831  approve
+2  0.291186     0.593432  ...  0.315574  approve
+3  0.458640     0.576156  ...  0.394891  approve
+4  0.463470     0.292414  ...  0.566605  approve
+
+[5 rows x 6 columns]
+#+end_example
+
+Then we select the data and split it for training.
+
+#+begin_src python
+y = df["status"]
+X = df.drop(columns="status")
+
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1, stratify=y)
+print(X_test.shape)
+print(X_train.shape)
+#+end_src
+
+#+RESULTS[f9ba2315f2143fde8b7de31c8a8a849da4a288a7]:
+#+begin_example
+(25, 5)
+(75, 5)
+#+end_example
+
+Then we import the model from sklearn and we train it with fit.
+
+#+begin_src python
+from sklearn.svm import SVC
+model = SVC(kernel='linear')
+
+model.fit(X_train, y_train)
+#+end_src
+
+#+RESULTS[87071ca7243582b35059baece4a634023b84e4de]:
+#+begin_example
+#+end_example
+
+Finally we create the predictions.
+
+#+begin_src python
+y_pred = model.predict(X_test)
+results = pd.DataFrame({
+    "Prediction": y_pred,
+    "Actual": y_test
+}).reset_index(drop=True)
+print(results.head())
+#+end_src
+
+#+RESULTS[88aca5838d60470a419c7543a6d7e4aa7e46f7fe]:
+#+begin_example
+  Prediction   Actual
+0    approve     deny
+1       deny  approve
+2       deny     deny
+3    approve     deny
+4       deny     deny
+#+end_example
+
+Then we get the accuracy score and generate a prediction matrix.
+
+#+begin_src python
+from sklearn.metrics import accuracy_score
+
+accuracy_score(y_test, y_pred)
+
+from sklearn.metrics import confusion_matrix
+confusion_matrix(y_test, y_pred)
+
+from sklearn.metrics import classification_report
+print(classification_report(y_test, y_pred))
+#+end_src
+
+#+RESULTS[518a340b268065aaaf4b069ca25cbcd8e49a0a1a]:
+#+begin_example
+              precision    recall  f1-score   support
+
+     approve       0.58      0.58      0.58        12
+        deny       0.62      0.62      0.62        13
+
+    accuracy                           0.60        25
+   macro avg       0.60      0.60      0.60        25
+weighted avg       0.60      0.60      0.60        25
+#+end_example
+
+The workflow of a SVM is very similar to a logistic regression:
+
+1. Select the data (independent and dependent).
+2. Split the data for training.
+3. Create and train the model.
+4. Create predictions.
+5. Validate the model.
+
+* Decision Trees
+:PROPERTIES:
+:CUSTOM_ID: decision-trees
+:END:
+
+A decision tree is an algorithm that builds a collection of if-then-else clasues that allow us to find the feature values that are more likely to correspond to a given category, so they can work with multiple categories.
+
+Decision trees can become deep and complex depending on the number of questions that have to be answered. Deep and complex trees tend to overfit the data and don't generalize well.
+
+** Decision Trees in Python
+:PROPERTIES:
+:CUSTOM_ID: decision-trees-in-python
+:END:
+
+We can visualize a decision tree with =graphviz= and =pydotplus=.
+
+#+begin_src python
+from sklearn import tree
+from sklearn.datasets import load_iris
+import graphviz
+import pydotplus
+
+iris = load_iris()
+clf = tree.DecisionTreeClassifier()
+clf = clf.fit(iris.data, iris.target)
+
+score = clf.score(iris.data, iris.target)
+print(score)
+#+end_src
+
+#+RESULTS[aa2a6a16928a07013f002e3fd26669e7208a3b44]:
+#+begin_example
+1.0
+#+end_example
+
+#+begin_src python :results graphics file :file ../resources/tree1.png :wrap org
+file = '../resources/tree1.png'
+dot_data = tree.export_graphviz(
+    clf, out_file=None,
+    feature_names=iris.feature_names,
+    class_names=iris.target_names,
+    filled=True, rounded=True,
+    special_characters=True
+)
+graph = pydotplus.graph_from_dot_data(dot_data)
+graph.write_png(file)
+print(file)
+#+end_src
+
+#+RESULTS[e03feb3dc26a4fe684517c959cf83a7a7b6054d4]:
+#+begin_org
+#+attr_html: :width 500px
+[[file:./../resources/tree1.png]]
+#+end_org
+
+In this case the first node will use the petal length, if it is less than 2.45, then it will classify the entry as setosa. Because the =gini= is 0.0, we only have a single category in this node, so the node doesn't have any children or other possible categories. However, in the other node, we have a =gini= of 0.5, meaning we have two categories with the same weight.
+
+If we stop at the second node, all the remaining observations are classified as, in this case, versicolor. However, we keep splitting the tree into more nodes until we find nodes where there was only one class left, =gini= is 0.0, these nodes are known as leaves as there are no more branches available.
+
+If we decide to cut the three at some point in the middle and keep the top part, we are left with the more relevant and less granular features at the bottom.
+
+** Aggregation
+:PROPERTIES:
+:CUSTOM_ID: aggregation
+:END:
+
+Anomalies in the training dataset can trick these trees, so we need to use Aggregation to deal with this. It takes a lot of simple algorithms and then takes a consensus, so instead of having a large tree we will have several small trees (weak classifiers) and we put them together to build a strong classifier which we can trust.
+
+We generate an algorithm that decides how to take into consideration the prediction of all single algorithms, such a majority vote (the most voted class wins), or techniques that use the Sensitivity for weighting the results of the vote.
+
+* Random Forest by Hand
+:PROPERTIES:
+:CUSTOM_ID: random-forest-by-hand
+:END:
+
+** Imports
+
+#+begin_src python
+from matplotlib import pyplot as plt
+from sklearn.datasets import make_classification
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.utils.random import sample_without_replacement
+from sklearn.utils import resample
+#+end_src
+
+#+RESULTS[c9e6afd4cc2be5d871e8fc4ac868dbd40b8713ae]:
+#+begin_example
+#+end_example
+
+** Create Data
+:PROPERTIES:
+:CUSTOM_ID: create-data
+:END:
+
+We will create a dataset with =make_classification= (like blobs but multi-dimensional), this will help us test our model. In this case we will set it to have 1000 samples, with 10 features from which 5 are useful.
+
+Then we create the =DataFrame= and =split= the data into test and train. We will standarize the data (mean is 0, std is 1) and normalize the numeric values using the =StandardScaler=. Then we use this model to transform the train and test sets.
+
+#+begin_src python
+X, y = make_classification(random_state=42, n_features=10, n_informative=5, n_redundant=0, n_samples=1000)
+X = pd.DataFrame(X)
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+scaler = StandardScaler().fit(X_train)
+X_train_scaled = scaler.transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+print(X_test_scaled.shape)
+#+end_src
+
+#+RESULTS[1d09aa0433f4534e066a0305255ea1302fce4d8b]:
+#+begin_example
+(250, 10)
+#+end_example
+
+** Predict
+:PROPERTIES:
+:CUSTOM_ID: predict
+:END:
+
+We will do model, fit predict in one step and get a the confusion matrix out of our prediction. Then we print the classification report.
+
+#+begin_src python
+clf = DecisionTreeClassifier().fit(X_train_scaled, y_train)
+y_pred = clf.predict(X_test_scaled)
+cm = confusion_matrix(y_test, y_pred)
+cm_df = pd.DataFrame(
+    cm.reshape(2, 2), index=["Actual 0", "Actual 1"],
+    columns=["Predicted 0", "Predicted 1"]
+)
+print(cm_df)
+#+end_src
+
+#+RESULTS[2dcc17a9bf92f4f026e02ad6c1f86e174c5797ff]:
+#+begin_example
+          Predicted 0  Predicted 1
+Actual 0          109           20
+Actual 1            9          112
+#+end_example
+
+We will note that the testing score is not great as trees are not great at generalizing.
+
+#+begin_src python
+print(classification_report(y_test, y_pred))
+print("Training Score:", clf.score(X_train_scaled, y_train))
+print("Testing Score:", clf.score(X_test_scaled, y_test))
+#+end_src
+
+#+RESULTS[445adcc2aa6ef699aab3f59a98fffcf761ca92ad]:
+#+begin_example
+              precision    recall  f1-score   support
+
+           0       0.92      0.84      0.88       129
+           1       0.85      0.93      0.89       121
+
+    accuracy                           0.88       250
+   macro avg       0.89      0.89      0.88       250
+weighted avg       0.89      0.88      0.88       250
+
+Training Score: 1.0
+Testing Score: 0.884
+#+end_example
+
+** Bagging
+:PROPERTIES:
+:CUSTOM_ID: bagging
+:END:
+
+Bagging allows us to give different samples to different trees so that the aggregation of all trees have seen all our dataset together but not individually.
+
+Instead of using a single tree, we will build many programmatically and try to take the best decision possible for each. In this case we will also visualize the score of each tree.
+
+#+begin_src python :results file :wrap org
+file = "../resources/bagging1.png"
+clfs = []
+scores = []
+
+for i in range(50):
+    X_train_scaled_bootstrap, y_train_bootstrap = resample(X_train_scaled, y_train, random_state=i)
+
+    clf = DecisionTreeClassifier(random_state=i+200).fit(X_train_scaled_bootstrap, y_train_bootstrap)
+    clfs.append(clf)
+
+    y_preds = [clf.predict(X_test_scaled) for clf in clfs]
+    y_pred = pd.DataFrame(y_preds).median().round()
+    score = accuracy_score(y_test, y_pred)
+    scores.append(score)
+
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.set_title("Scores")
+ax.plot(scores)
+fig.savefig(file)
+print(file)
+#+end_src
+
+#+RESULTS[b4d39460c89fd1dea5eff8c13be0caab031190e7]:
+#+begin_org
+[[file:../resources/bagging1.png]]
+#+end_org
+
+** Random Forest Pre-built
+:PROPERTIES:
+:CUSTOM_ID: random-forest-pre-built
+:END:
+
+We can instead use a pre-built Random Forest Classifier.
+
+#+begin_src python
+from sklearn.ensemble import RandomForestClassifier
+
+clf = RandomForestClassifier(random_state=1, n_estimators=50).fit(X_train_scaled, y_train)
+print("Previous Score by hand", np.mean(scores))
+print("Score Pre-built", clf.score(X_test_scaled, y_test))
+#+end_src
+
+#+RESULTS[55e1041f306d488e7e7bec0974456bd99cb0d06a]:
+#+begin_example
+Previous Score by hand 0.8984800000000003
+Score Pre-built 0.904
+#+end_example
+
+There are other Random Trees Algorithms.
+
+#+begin_src python
+from sklearn.ensemble import ExtraTreesClassifier
+
+clf = ExtraTreesClassifier(random_state=1, n_estimators=50).fit(X_train_scaled, y_train)
+print("Train Score:", clf.score(X_train_scaled, y_train))
+print("Test Score:", clf.score(X_test_scaled, y_test))
+#+end_src
+
+#+RESULTS[d568d2464ea622be46a2afb6050a5913fa8179e3]:
+#+begin_example
+Train Score: 1.0
+Test Score: 0.928
+#+end_example
+
+** Ada-Boost Classifier
+:PROPERTIES:
+:CUSTOM_ID: ada-boost-classifier
+:END:
+
+In AdaBoost, a model is trained then evaluated. After evaluating the errors of the first model, another model is trained. This time, however, the model gives extra weight to the errors from the previous model, so the subsequent models minimize similar errors. This process is repeated until the error rate is minimized.
+
+#+begin_src python
+from sklearn.ensemble import AdaBoostClassifier
+
+clf = AdaBoostClassifier(random_state=1, n_estimators=50, base_estimator=DecisionTreeClassifier(max_depth=2)).fit(X_train_scaled, y_train)
+
+print("Train Score:", clf.score(X_train_scaled, y_train))
+print("Test Score:", clf.score(X_test_scaled, y_test))
+#+end_src
+
+#+RESULTS[8f4d58d544cb337c18e8287d78fcb0ff7a328579]:
+#+begin_example
+Train Score: 1.0
+Test Score: 0.896
+#+end_example
+
+* Choosing an Ensemble Model
+:PROPERTIES:
+:CUSTOM_ID: choosing-an-ensemble-model
+:END:
+
+** Imports
+
+#+begin_src python :exports code
+from matplotlib import pyplot as plt
+from sklearn.datasets import make_regression
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report
+#+end_src
+
+#+RESULTS[f8a1e792f47cb01037912441db42eca2102be7b2]:
+#+begin_example
+#+end_example
+
+** Loading the Data
+:PROPERTIES:
+:CUSTOM_ID: loading-the-data
+:END:
+
+#+begin_src python
+df = pd.read_csv('../resources/diabetes.csv')
+X = df.drop('Outcome', axis=1)
+y = df['Outcome']
+target_names = ["negative", "positive"]
+print(df.head())
+#+end_src
+
+#+RESULTS[c16864c510087a5c66327d8e1752d54c6a37990a]:
+#+begin_example
+   Pregnancies  Glucose  ...  Age  Outcome
+0            6      148  ...   50        1
+1            1       85  ...   31        0
+2            8      183  ...   32        1
+3            1       89  ...   21        0
+4            0      137  ...   33        1
+
+[5 rows x 9 columns]
+#+end_example
+
+** Creating a Tester function
+:PROPERTIES:
+:CUSTOM_ID: creating-a-tester-function
+:END:
+
+We can create a function to automate the process of testing each model.
+
+#+begin_src python
+def model_tester(model, X, y):
+    """Returns the classification report and the train and test scores of a given model"""
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+    scaler = StandardScaler().fit(X_train)
+    X_train_scaled = scaler.transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    clf = model.fit(X_train_scaled, y_train)
+    y_pred = model.predict(X_test_scaled)
+    return (
+        classification_report(y_test, y_pred, target_names=target_names),
+        clf.score(X_train_scaled, y_train),
+        clf.score(X_test_scaled, y_test)
+    )
+print(model_tester)
+#+end_src
+
+#+RESULTS[b0df2b7107ecb701a8e1a8d86e2dc069c15eced5]:
+#+begin_example
+<function model_tester at 0x12ff17c20>
+#+end_example
+
+** Using the function to compare models
+:PROPERTIES:
+:CUSTOM_ID: using-the-function-to-compare-models
+:END:
+
+#+begin_src python
+from sklearn.ensemble import AdaBoostClassifier
+
+report, train_score, test_score = model_tester(AdaBoostClassifier(random_state=1), X, y)
+print(report, train_score, test_score)
+#+end_src
+
+#+RESULTS[abcd350007bcfff0a6013b2277cc78103e86f77d]:
+#+begin_example
+              precision    recall  f1-score   support
+
+    negative       0.83      0.85      0.84       123
+    positive       0.73      0.70      0.71        69
+
+    accuracy                           0.80       192
+   macro avg       0.78      0.77      0.78       192
+weighted avg       0.80      0.80      0.80       192
+ 0.8229166666666666 0.796875
+#+end_example
+
+#+begin_src python
+from sklearn.ensemble import RandomForestClassifier
+
+report, train_score, test_score = model_tester(RandomForestClassifier(random_state=1), X, y)
+print(report, train_score, test_score)
+#+end_src
+
+#+RESULTS[c02b942108e2de6d264049e3d09419a7e67ede38]:
+#+begin_example
+              precision    recall  f1-score   support
+
+    negative       0.83      0.89      0.86       123
+    positive       0.78      0.67      0.72        69
+
+    accuracy                           0.81       192
+   macro avg       0.80      0.78      0.79       192
+weighted avg       0.81      0.81      0.81       192
+ 1.0 0.8125
+#+end_example
+
+#+begin_src python
+from sklearn.ensemble import ExtraTreesClassifier
+
+report, train_score, test_score = model_tester(ExtraTreesClassifier(random_state=1), X, y)
+print(report, train_score, test_score)
+#+end_src
+
+#+RESULTS[c7fc98860787432162c19bf3786cbff7fdbe1445]:
+#+begin_example
+              precision    recall  f1-score   support
+
+    negative       0.82      0.86      0.84       123
+    positive       0.73      0.65      0.69        69
+
+    accuracy                           0.79       192
+   macro avg       0.77      0.76      0.76       192
+weighted avg       0.78      0.79      0.78       192
+ 1.0 0.7864583333333334
+#+end_example
+
+* Feature Selection with Random Forest
+:PROPERTIES:
+:CUSTOM_ID: feature-selection-with-random-forest
+:END:
+
+What feature selection allows us to do is to determine which features are useful to the model, giving out information about the target variable. We select a subset of features because this allows us to make our dataset smaller (reducing the width) and the models will lose complexity.
+
+We can use the Random Forest models to try to select the best feature at every split. We can grab the complete Random Forest and see which features where used where, so we can get an idea of the importance of them. A feature is important if it appears in most trees and if it appears towards the top of the tree or if it is not a leaf.
+
+** Imports
+
+#+begin_src python
+from matplotlib import pyplot as plt
+from sklearn.datasets import make_classification
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+#+end_src
+
+** Load Data
+:PROPERTIES:
+:CUSTOM_ID: load-data
+:END:
+
+#+begin_src python
+df = pd.read_csv('../resources/arrhythmia.csv')
+for col in df.columns:
+    if df[col].dtype == 'object':
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+
+df.drop('J_angle', axis=1, inplace=True)
+df.dropna(inplace=True)
+
+X = df.drop('class', axis=1)
+y = df['class'] != 1
+print(X.shape, y.shape)
+#+end_src
+
+#+RESULTS[3c97b1588c5f5ad25c271b910f44da216a293ba9]:
+#+begin_example
+(420, 278) (420,)
+#+end_example
+
+** Split the Data
+:PROPERTIES:
+:CUSTOM_ID: split-the-data
+:END:
+
+#+begin_src python
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+scaler = StandardScaler().fit(X_train)
+X_train_scaled = scaler.transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+print(X_train_scaled.shape, X_test_scaled.shape)
+#+end_src
+
+#+RESULTS[309cb938d3616a80651f53374e13293dbb418433]:
+#+begin_example
+(315, 278) (105, 278)
+#+end_example
+
+** Creating a first Model
+:PROPERTIES:
+:CUSTOM_ID: creating-a-first-model
+:END:
+
+We are going to start by making a prediction with a Random Forest Classifier. Then later we may use another model as we will have less features.
+
+#+begin_src python
+clf = RandomForestClassifier(random_state=1, n_estimators=500).fit(X_train_scaled, y_train)
+print("Scores (train, test):", clf.score(X_train_scaled, y_train), clf.score(X_test_scaled, y_test))
+#+end_src
+
+#+RESULTS[5dc31b221c791ee36362af2b670971930ccdba3e]:
+#+begin_example
+Scores (train, test): 1.0 0.7142857142857143
+#+end_example
+
+** Using the Features attribute
+:PROPERTIES:
+:CUSTOM_ID: using-the-features-attribute
+:END:
+
+We can use the =feature_importances_= attribute of the Random Forest Model to get the importance of the features as an array.
+
+#+begin_src python :results file :wrap org
+features = clf.feature_importances_
+
+file = "../resources/features1.png"
+fig, ax = plt.subplots(figsize=(5, 3))
+ax.bar(x=range(len(features)), height=features)
+fig.savefig(file)
+
+print(file)
+#+end_src
+
+#+RESULTS[778456ca758d53a999f220dd74784e7a0f84631e]:
+#+begin_org
+[[file:../resources/features1.png]]
+#+end_org
+
+#+begin_src python
+df_f = pd.Series(
+    features, index=X.columns
+)
+df_f.sort_values(inplace=True, ascending=False)
+print(df_f.head(10))
+#+end_src
+
+#+RESULTS[a2edf36d45ffe69fd4638a3dc3106bf52b9dcb4e]:
+#+begin_example
+Heart_rate              0.080918
+V4_QRSTA                0.043120
+V1_QRSA                 0.033950
+V5_R_wave_amplitude     0.030973
+DII_T_wave_amplitude    0.027136
+V3_JJ_wave_amplitude    0.023354
+V2_JJ_wave_amplitude    0.022617
+V6_T_wave_amplitude     0.022361
+DII_R_wave_width        0.021570
+AVF_Q_wave_amplitude    0.021205
+dtype: float64
+#+end_example
+
+** Selecting Features
+:PROPERTIES:
+:CUSTOM_ID: selecting-features
+:END:
+
+We don't need all the features so we will use the =feature_selection= module to get ony a few.
+
+The support will be a description of which features are relevant based on the SelectModel fit.
+
+#+begin_src python
+from sklearn.feature_selection import SelectFromModel
+
+sel = SelectFromModel(clf)
+sel.fit(X_train_scaled, y_train)
+supp = sel.get_support()
+print("Support: ", supp[:20])
+#+end_src
+
+#+RESULTS[d5d003dd07b8706d9acee81cbfdce7faec3e5f7e]:
+#+begin_example
+Support:  [ True False  True  True  True False  True  True  True False False False
+ False  True False False  True False False False]
+#+end_example
+
+** New Model with the Selected Features
+:PROPERTIES:
+:CUSTOM_ID: new-model-with-the-selected-features
+:END:
+
+We will re-train the model but using =sel.transform= on our dataset to select only the features we are interested in (those who make the cut).
+
+#+begin_src python
+X_selected_train, X_selected_test, y_train, y_test = train_test_split(sel.transform(X), y, random_state=1)
+scaler = StandardScaler().fit(X_selected_train)
+X_selected_train_scaled = scaler.transform(X_selected_train)
+X_selected_test_scaled = scaler.transform(X_selected_test)
+print(X_selected_train_scaled.shape, X_selected_test_scaled.shape)
+#+end_src
+
+#+RESULTS[3f9aaf8c85ebe8a223ef36d64808697ad38f0df2]:
+#+begin_example
+/Users/albertovaldez/.pyenv/versions/3.7.13/lib/python3.7/site-packages/sklearn/base.py:444: UserWarning: X has feature names, but SelectFromModel was fitted without feature names
+  f"X has feature names, but {self.__class__.__name__} was fitted without"
+(315, 108) (105, 108)
+#+end_example
+
+** Evaluating the new Model
+:PROPERTIES:
+:CUSTOM_ID: evaluating-the-new-model
+:END:
+
+#+begin_src python
+clf = LogisticRegression().fit(X_train_scaled, y_train)
+print("Scored (train, test):", clf.score(X_train_scaled, y_train), clf.score(X_test_scaled, y_test))
+#+end_src
+
+#+RESULTS[9c9258de3b65b83a37200d5ea379eade0ce257c4]:
+#+begin_example
+Scored (train, test): 0.9523809523809523 0.7142857142857143
+#+end_example

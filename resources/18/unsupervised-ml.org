@@ -1,0 +1,1343 @@
+#+title: Unsupervised Machine Learning
+#+subtitle: 
+#+author: Alberto Valdez
+#+SETUPFILE: ../config/org-theme-alt.config
+#+SETUPFILE: ../config/org-header.config
+
+#+NAME: wrap_table
+#+begin_src python :wrap export html :exports none
+from xml.etree.ElementTree import Element, SubElement, dump
+
+def build_row(parent: Element, data: str, tag: str) -> Element:
+    child = SubElement(parent, "tr")
+    for s in data.split("\t"):
+        SubElement(child, tag).text = s
+    return child
+# XML
+def build_html(data: str) -> Element:
+    data_list = data.split("\n")
+    table = Element("table")
+    build_row(table, data_list[0], "th")
+    for row in data_list[1:-1]:
+        build_row(table, row, "td")
+    return table
+
+table = build_html(data)
+dump(table)
+#+end_src
+
+#+RESULTS[e32c4cf95931f68fada01bc81d9f5834bc3b4e24]: wrap_table.py
+#+begin_export html
+#+end_export
+
+
+* Unsupervised Machine Learning
+:PROPERTIES:
+:CUSTOM_ID: unsupervised-machine-learning
+:END:
+
+Unsupervised ML allows us to find hidden patterns in our data to get observations to help us make decisions or change our perspective on the data.
+
+The main difference against Supervised Learning is that there is no target variable. We will build labels from the patterns that arise by clustering information, so we will focus on the *features* and we will work on them.
+
+Unsupervised learning requires more human work and as it is an iteractive process.
+
+- Some use cases are grouping unlabeled data into distinct clusters.
+
+- Detecting unusual data points in a dataset (anomaly detection).
+
+- Reducing large dataset into smaller datasets while preserving most of the useful information (dimensionality reduction.)
+
+** Clustering
+:PROPERTIES:
+:CUSTOM_ID: clustering
+:END:
+
+We can use clustering to group patterns into different clusters.
+
+Anomaly detection is when we use clustering to identify datapoints that may be suspicious (like credit card fraudulent transactions).
+
+When doing dimensionality reduction, we reduce N number of features into a handful of features or a single one. This allows us to generate labels that we can use to feed to the Supervised Learning models.
+
+A very popular example is customer segmentation, which allows companies to detect habits and references and build data on top of that to create predictions. For example, personalized movies suggestions in Netflix, Amazon, etc.
+
+* Data preparation
+:PROPERTIES:
+:CUSTOM_ID: data-preparation
+:END:
+
+Data preparation is the process of converting the data of whichever nature to numbers, for example dates to time measurements or labels into integers.
+
+We will convert the text data from the dataset to integer labels.
+
+#+begin_src python
+import pandas as pd
+from pathlib import Path
+
+
+file_path = Path('../resources/iris.csv')
+df = pd.read_csv(file_path)
+print(df.head(5))
+#+end_src
+
+#+RESULTS[04f0e0e17771f9a1c7cae1b5a7394d4b8322b488]:
+#+begin_example
+   sepal_length  sepal_width  ...  petal_width        class
+0           5.1          3.5  ...          0.2  Iris-setosa
+1           4.9          3.0  ...          0.2  Iris-setosa
+2           4.7          3.2  ...          0.2  Iris-setosa
+3           4.6          3.1  ...          0.2  Iris-setosa
+4           5.0          3.6  ...          0.2  Iris-setosa
+
+[5 rows x 5 columns]
+#+end_example
+
+
+#+begin_src python
+class_dict = {'Iris-setosa': 0, 'Iris-versicolor': 1, 'Iris-virginica': 2}
+df2 = df.replace({'class': class_dict})
+print(df2.head())
+#+end_src
+
+#+RESULTS[036a7b53e40cf31b5d4f672455e62799769abe79]:
+#+begin_example
+   sepal_length  sepal_width  ...  petal_width  class
+0           5.1          3.5  ...          0.2      0
+1           4.9          3.0  ...          0.2      0
+2           4.7          3.2  ...          0.2      0
+3           4.6          3.1  ...          0.2      0
+4           5.0          3.6  ...          0.2      0
+
+[5 rows x 5 columns]
+#+end_example
+
+#+begin_src python
+new_iris_df = df.drop(["class"], axis=1)
+print(new_iris_df.head(5))
+#+end_src
+
+#+RESULTS[33e21a31521ec581ea6e2df965a28ac61b520fdd]:
+#+begin_example
+   sepal_length  sepal_width  petal_length  petal_width
+0           5.1          3.5           1.4          0.2
+1           4.9          3.0           1.4          0.2
+2           4.7          3.2           1.3          0.2
+3           4.6          3.1           1.5          0.2
+4           5.0          3.6           1.4          0.2
+#+end_example
+
+** Transformation Example
+:PROPERTIES:
+:CUSTOM_ID: transformation-example
+:END:
+
+You are given a dataset that contains historical data from purchases of an online store made by 200 customers. In this activity you will put in action your data preprocessing superpowers, also you'll add some new skills needed to start finding customers clusters.
+
+#+begin_src python
+import pandas as pd
+from pathlib import Path
+
+file_path = Path('../resources/shopping_data.csv')
+df_shopping = pd.read_csv(file_path)
+print(df_shopping.dtypes)
+print(df_shopping['Previous Shopper'].head())
+print(df_shopping['Age'].head())
+print(df_shopping['Annual Income'].head())
+print(df_shopping['Spending Score (1-100)'].head())
+#+end_src
+
+#+RESULTS[2e5d4a324c9453a008ad4c7a15ce65779af96d5a]:
+#+begin_example
+CustomerID                 int64
+Previous Shopper          object
+Age                        int64
+Annual Income              int64
+Spending Score (1-100)     int64
+dtype: object
+0    Yes
+1    Yes
+2     No
+3     No
+4     No
+Name: Previous Shopper, dtype: object
+0    19
+1    21
+2    20
+3    23
+4    31
+Name: Age, dtype: int64
+0    15000
+1    15000
+2    16000
+3    16000
+4    17000
+Name: Annual Income, dtype: int64
+0    39
+1    81
+2     6
+3    77
+4    40
+Name: Spending Score (1-100), dtype: int64
+#+end_example
+
+We will drop the data that we don't want.
+
+#+begin_src python
+df_shopping = df_shopping.drop(['CustomerID'], axis=1)
+print(df_shopping.head())
+#+end_src
+
+#+RESULTS[3bf489523481c6dd4e57ead6617c4e2fa03c7671]:
+#+begin_example
+  Previous Shopper  ...  Spending Score (1-100)
+0              Yes  ...                      39
+1              Yes  ...                      81
+2               No  ...                       6
+3               No  ...                      77
+4               No  ...                      40
+
+[5 rows x 4 columns]
+#+end_example
+
+We will drop the null values.
+
+#+begin_src python
+print(df_shopping.shape)
+df_shopping.dropna(inplace=True)
+print(df_shopping.shape)
+#+end_src
+
+#+RESULTS[21e78cf1271ce0aef3338eedf20ddb02091a3b4b]:
+#+begin_example
+(200, 4)
+(200, 4)
+#+end_example
+
+Now we replace the non-numeric data.
+
+#+begin_src python
+def convert_status(status):
+    return 1 if status == 'Yes' else 0
+df_shopping["Previous Shopper"] = df_shopping["Previous Shopper"].map(convert_status)
+print(df_shopping["Previous Shopper"].head())
+#+end_src
+
+#+RESULTS[d1a184147ed0f9cea78cd6e04a18eaaff54f154c]:
+#+begin_example
+0    1
+1    1
+2    0
+3    0
+4    0
+Name: Previous Shopper, dtype: int64
+#+end_example
+
+We want to normalize the data, scale it.
+
+#+begin_src python
+df_shopping["Annual Income"] = df_shopping["Annual Income"] / 1000
+print(df_shopping.head())
+file_path = Path('../resources/shopping_cleaned.csv')
+pd.to_csv(file_path, index=False)
+#+end_src
+
+#+RESULTS[55539e32f4d33e9faf1e8bda75d7bc4bc7f3ee56]:
+#+begin_example
+   Previous Shopper  ...  Spending Score (1-100)
+0                 1  ...                      39
+1                 1  ...                      81
+2                 0  ...                       6
+3                 0  ...                      77
+4                 0  ...                      40
+
+[5 rows x 4 columns]
+#+end_example
+
+** Data Transformation Example 2
+:PROPERTIES:
+:CUSTOM_ID: data-transformation-example-2
+:END:
+
+#+begin_src python
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+
+df = pd.read_csv('../resources/marathon_2019.csv')
+print(df.head())
+#+end_src
+
+#+RESULTS[cbfd60ef1bf717d2cd6061c958c2fd0480801af0]:
+#+begin_example
+  Bib               Name  Age M/F      City State  ...     Pace Proj Time Official Time Overall Gender Division
+0   2  Cherono, Lawrence   30   M   Eldoret   NaN  ...  0:04:53       NaN       2:07:57       1      1        1
+1   6     Desisa, Lelisa   29   M      Ambo   NaN  ...  0:04:53       NaN       2:07:59       2      2        2
+2   7  Kipkemoi, Kenneth   34   M   Eldoret   NaN  ...  0:04:54       NaN       2:08:07       3      3        3
+3   8      Kandie, Felix   32   M      Iten   NaN  ...  0:04:55       NaN       2:08:54       4      4        4
+4  11    Kirui, Geoffrey   26   M  Keringet   NaN  ...  0:04:56       NaN       2:08:55       5      5        5
+
+[5 rows x 24 columns]
+#+end_example
+
+Subset the dataframe to only the columns "Age", "M/F", split times (i.e. "5K, 10K", etc.), "Pace", and "Official Time".
+#+begin_src python
+df = df[["Age", "M/F", "5K", "10K", "15K", "20K", "Pace", "Official Time"]]
+print(df.head())
+#+end_src
+
+#+RESULTS[a7e35838b8a38cf3e94af071204ec6d274af3a07]:
+#+begin_example
+   Age M/F       5K      10K      15K      20K     Pace Official Time
+0   30   M  0:15:11  0:30:21  0:45:48  1:01:16  0:04:53       2:07:57
+1   29   M  0:15:10  0:30:22  0:45:46  1:01:16  0:04:53       2:07:59
+2   34   M  0:15:14  0:30:22  0:45:47  1:01:17  0:04:54       2:08:07
+3   32   M  0:15:14  0:30:24  0:45:47  1:01:16  0:04:55       2:08:54
+4   26   M  0:15:12  0:30:21  0:45:46  1:01:15  0:04:56       2:08:55
+#+end_example
+
+#+begin_src python
+print(df.shape)
+df.dropna(inplace=True)
+print(df.shape)
+#+end_src
+
+#+RESULTS[0ac5948438996f8c06491ccc1017050ac684d9af]:
+#+begin_example
+(26647, 8)
+(26647, 8)
+#+end_example
+
+Convert the time data. We we are going to convert the data to time delta to get how long it took each athlete reach the goal.
+
+#+begin_src python
+time_columns = ["5K", "10K", "15K", "20K", "Pace", "Official Time"]
+df[time_columns] = df[time_columns].apply(lambda x: x.replace('-', '0')).apply(pd.to_timedelta)
+print(df.head())
+#+end_src
+
+#+RESULTS[b8c746ea7256ac193617c7489c6246c549e56303]:
+#+begin_example
+   Age M/F              5K             10K             15K             20K            Pace   Official Time
+0   30   M 0 days 00:15:11 0 days 00:30:21 0 days 00:45:48 0 days 01:01:16 0 days 00:04:53 0 days 02:07:57
+1   29   M 0 days 00:15:10 0 days 00:30:22 0 days 00:45:46 0 days 01:01:16 0 days 00:04:53 0 days 02:07:59
+2   34   M 0 days 00:15:14 0 days 00:30:22 0 days 00:45:47 0 days 01:01:17 0 days 00:04:54 0 days 02:08:07
+3   32   M 0 days 00:15:14 0 days 00:30:24 0 days 00:45:47 0 days 01:01:16 0 days 00:04:55 0 days 02:08:54
+4   26   M 0 days 00:15:12 0 days 00:30:21 0 days 00:45:46 0 days 01:01:15 0 days 00:04:56 0 days 02:08:55
+#+end_example
+
+Now we convert time units to seconds so we can process them as integer units.
+
+#+begin_src python
+df[time_columns] = df[time_columns].apply(lambda x: x.dt.total_seconds())
+print(df.head())
+#+end_src
+
+#+RESULTS[5831e8f8dbe0af867a73b76e6b842630f4a802f7]:
+#+begin_example
+   Age M/F     5K     10K     15K     20K   Pace  Official Time
+0   30   M  911.0  1821.0  2748.0  3676.0  293.0         7677.0
+1   29   M  910.0  1822.0  2746.0  3676.0  293.0         7679.0
+2   34   M  914.0  1822.0  2747.0  3677.0  294.0         7687.0
+3   32   M  914.0  1824.0  2747.0  3676.0  295.0         7734.0
+4   26   M  912.0  1821.0  2746.0  3675.0  296.0         7735.0
+#+end_example
+
+We check for zeroes.
+
+#+begin_src python
+print(df.shape)
+df = df[~(df == 0).any(axis=1)]
+print(df.shape)
+#+end_src
+
+#+RESULTS[f9fd1574a5a010e20b85ff7bd66622d3f05f072d]:
+#+begin_example
+(26647, 8)
+(24529, 8)
+#+end_example
+
+Converting labels to numbers using LabelEncoder. This is a scikit learn to convert labels to integers. The fit transform function is fit and predict for the model on some given data. It returns either a 1 or a 2.
+
+#+begin_src python
+df['M/F'] = LabelEncoder().fit_transform(df['M/F'])
+print(df.head())
+#+end_src
+
+#+RESULTS[e5ef0e5ac2b5d0084a33cf814b1fabd8c3bec096]:
+#+begin_example
+   Age  M/F     5K     10K     15K     20K   Pace  Official Time
+0   30    1  911.0  1821.0  2748.0  3676.0  293.0         7677.0
+1   29    1  910.0  1822.0  2746.0  3676.0  293.0         7679.0
+2   34    1  914.0  1822.0  2747.0  3677.0  294.0         7687.0
+3   32    1  914.0  1824.0  2747.0  3676.0  295.0         7734.0
+4   26    1  912.0  1821.0  2746.0  3675.0  296.0         7735.0
+#+end_example
+
+We check for types.
+
+#+begin_src python
+print(df.dtypes)
+#+end_src
+
+#+RESULTS[3d2057868b29596b81785060ed27578c50b620b2]:
+#+begin_example
+Age                int64
+M/F                int64
+5K               float64
+10K              float64
+15K              float64
+20K              float64
+Pace             float64
+Official Time    float64
+dtype: object
+#+end_example
+
+#+begin_src python
+df['Age'] = pd.to_numeric(df['Age'])
+print(df['Age'].head())
+#+end_src
+
+#+RESULTS[d047cdc947855bece9874109bb356f5f92250d89]:
+#+begin_example
+0    30
+1    29
+2    34
+3    32
+4    26
+Name: Age, dtype: int64
+#+end_example
+
+Check for correlation.
+
+#+begin_src python :results file :wrap org
+from matplotlib import pyplot as plt
+
+file = '../resources/correlation.png'
+plot = df.plot(kind='scatter', x='Pace', y='Official Time')
+plt.savefig(file)
+print(file)
+#+end_src
+
+#+RESULTS[6e6ec7883683e35b53b178bb4eab0a8fc8ed7410]:
+#+begin_org
+[[file:../resources/correlation.png]]
+#+end_org
+
+Finally we scale the data.
+
+#+begin_src python
+X = df.drop("Pace", axis=1)
+X_scaled = MinMaxScaler().fit_transform(X)
+print(X_scaled[:5])
+#+end_src
+
+#+RESULTS[1ca41e5bbb3a50d32b29855a93cef87e7e909132]:
+#+begin_example
+[[1.84615385e-01 1.00000000e+00 2.72108844e-02 0.00000000e+00
+  4.94722955e-04 2.45730434e-04 0.00000000e+00]
+ [1.69230769e-01 1.00000000e+00 2.68107243e-02 2.49066002e-04
+  1.64907652e-04 2.45730434e-04 1.04920785e-04]
+ [2.46153846e-01 1.00000000e+00 2.84113645e-02 2.49066002e-04
+  3.29815303e-04 3.68595651e-04 5.24603924e-04]
+ [2.15384615e-01 1.00000000e+00 2.84113645e-02 7.47198007e-04
+  3.29815303e-04 2.45730434e-04 2.99024237e-03]
+ [1.23076923e-01 1.00000000e+00 2.76110444e-02 0.00000000e+00
+  1.64907652e-04 1.22865217e-04 3.04270276e-03]]
+#+end_example
+
+Now we can compare the scaled data to the original one.
+#+begin_src python
+print(X[:5])
+#+end_src
+
+#+RESULTS[25b510492d3e244ebbd18b6e42d7df8ec262be95]:
+#+begin_example
+   Age  M/F     5K     10K     15K     20K  Official Time
+0   30    1  911.0  1821.0  2748.0  3676.0         7677.0
+1   29    1  910.0  1822.0  2746.0  3676.0         7679.0
+2   34    1  914.0  1822.0  2747.0  3677.0         7687.0
+3   32    1  914.0  1824.0  2747.0  3676.0         7734.0
+4   26    1  912.0  1821.0  2746.0  3675.0         7735.0
+#+end_example
+
+
+* K-Means Algorithm
+:PROPERTIES:
+:CUSTOM_ID: k-means-algorithm
+:END:
+
+K-Means groups together observations that have similar features.
+
+K-means works by finding centroids in the plane and measure the distance from the centroid to the observation. It will optimize the centroid position that maximazes the distance to other centroid positions and minimizes the distance between all possible observations that can be closest to the centroid.
+
+We consider an observation part of the cluster if it is within the radius of the cluster.
+
+The *k* referes to the number of clusters we want to computer.
+
+1. Randomly initialize the k starting centroids.
+2. Each data point is assigned to its nearest centroid.
+3. The centroids are recomputed as the mean of the data points assigned to respective clsuter.
+4. Repeat 1 to 3 until the stopping criteria is triggered.
+
+** The Elbow Curve
+:PROPERTIES:
+:CUSTOM_ID: the-elbow-curve
+:END:
+
+The best number of *K* can be determined using the elbow curve. The x-axis is the *k* value and the y-axis is some objective function.
+
+We will start asking a high number of clusters and we will measure the inertia, then ask for a lower number and continue measuring the inertia. Whenever the inertia goes from a high slope to a lower slope in the curve (as an elbow), we use that point as our *k* value.
+
+* K-Cluster Example
+:PROPERTIES:
+:CUSTOM_ID: k-cluster-example
+:ID:       35d0d89b-cddf-4107-9cb7-f20c189347fa
+:END:
+
+** Load the Data
+:PROPERTIES:
+:CUSTOM_ID: load-the-data
+:END:
+
+#+begin_src python
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+
+# Import the KMeans module and matplotlib
+from sklearn.cluster import KMeans
+from matplotlib import pyplot as plt
+
+df = pd.read_csv('../resources/marathon_2019.csv')
+df = df[['Age', 'M/F', '5K', '10K', '15K', '20K', 'Half', '25K', '30K', '35K', '40K', 'Pace', 'Official Time']]
+print(df.head())
+#+end_src
+
+#+RESULTS[f753d8f0f525ca4153e636dc83b3499c0c07da7e]:
+#+begin_example
+   Age M/F       5K      10K      15K      20K     Half      25K      30K      35K      40K     Pace Official Time
+0   30   M  0:15:11  0:30:21  0:45:48  1:01:16  1:04:29  1:16:23  1:32:01  1:47:16  2:01:45  0:04:53       2:07:57
+1   29   M  0:15:10  0:30:22  0:45:46  1:01:16  1:04:30  1:16:24  1:32:01  1:47:16  2:01:46  0:04:53       2:07:59
+2   34   M  0:15:14  0:30:22  0:45:47  1:01:17  1:04:31  1:16:24  1:32:01  1:47:16  2:01:45  0:04:54       2:08:07
+3   32   M  0:15:14  0:30:24  0:45:47  1:01:16  1:04:31  1:16:24  1:32:01  1:47:16  2:02:08  0:04:55       2:08:54
+4   26   M  0:15:12  0:30:21  0:45:46  1:01:15  1:04:28  1:16:23  1:32:01  1:47:16  2:01:57  0:04:56       2:08:55
+#+end_example
+
+** Convert time to Time Delta
+:PROPERTIES:
+:CUSTOM_ID: convert-time-to-time-delta
+:END:
+
+We want to convert the time units into seconds. So we convert it to timedelta first, then to total seconds.
+
+#+begin_src python
+time_columns = ["5K", "10K", "15K", "20K", "Half", "25K", "30K", "35K", "40K", "Pace", "Official Time"]
+df[time_columns] = df[time_columns].apply(lambda x: x.replace('-', '0')).apply(pd.to_timedelta)
+df[time_columns] = df[time_columns].apply(lambda x: x.dt.total_seconds())
+print(df.head())
+#+end_src
+
+#+RESULTS[005d098a66fd7dc26979222ac49d24d45c07cb62]:
+#+begin_example
+   Age M/F     5K     10K     15K     20K    Half     25K     30K     35K     40K   Pace  Official Time
+0   30   M  911.0  1821.0  2748.0  3676.0  3869.0  4583.0  5521.0  6436.0  7305.0  293.0         7677.0
+1   29   M  910.0  1822.0  2746.0  3676.0  3870.0  4584.0  5521.0  6436.0  7306.0  293.0         7679.0
+2   34   M  914.0  1822.0  2747.0  3677.0  3871.0  4584.0  5521.0  6436.0  7305.0  294.0         7687.0
+3   32   M  914.0  1824.0  2747.0  3676.0  3871.0  4584.0  5521.0  6436.0  7328.0  295.0         7734.0
+4   26   M  912.0  1821.0  2746.0  3675.0  3868.0  4583.0  5521.0  6436.0  7317.0  296.0         7735.0
+#+end_example
+
+** Clean the data
+:PROPERTIES:
+:CUSTOM_ID: clean-the-data
+:END:
+
+We will subset the dataframe again, removing all zeroes. Then encode the labels into integers.
+
+#+begin_src python
+df[~(df == 0).any(axis=1)]
+df['M/F'] = LabelEncoder().fit_transform(df['M/F'])
+print(df['M/F'].head())
+#+end_src
+
+#+RESULTS[712e700d0d471245ab439ac627ae044591516978]:
+#+begin_example
+0    1
+1    1
+2    1
+3    1
+4    1
+Name: M/F, dtype: int64
+#+end_example
+
+Convert to numerics values.
+
+#+begin_src python
+df['Age'] = pd.to_numeric(df['Age'])
+print(df['Age'].head())
+#+end_src
+
+#+RESULTS[d047cdc947855bece9874109bb356f5f92250d89]:
+#+begin_example
+0    30
+1    29
+2    34
+3    32
+4    26
+Name: Age, dtype: int64
+#+end_example
+
+Check correlation of data. It should be linear.
+
+#+begin_src python :results output file :wrap org
+imgpath = "../resources/correlation2.png"
+fig, ax = plt.subplots(figsize=(5, 3))
+ax.scatter(x=df['Pace'], y=df['Official Time'])
+fig.savefig(imgpath)
+print(imgpath)
+#+end_src
+
+#+RESULTS[5cdef8dac783d110e4b047a84231969dea84651e]:
+#+begin_org
+[[file:../resources/correlation2.png]]
+#+end_org
+
+** Creating a Training Set
+:PROPERTIES:
+:CUSTOM_ID: creating-a-training-set
+:END:
+
+Create a training set 'X' without the 'Pace' column.
+
+#+begin_src python
+X = df.drop('Pace', axis=1)
+X_scaled = MinMaxScaler().fit_transform(X)
+print(X_scaled[:5])
+#+end_src
+
+#+RESULTS[ccfa8ecdcc3b19577c621315a7d17ebb5c0959b2]:
+#+begin_example
+[[1.84615385e-01 1.00000000e+00 2.72591263e-01 3.12028787e-01
+  3.11953684e-01 2.96499435e-01 2.95682079e-01 2.83163423e-01
+  2.75073489e-01 2.70272540e-01 2.75670780e-01 0.00000000e+00]
+ [1.69230769e-01 1.00000000e+00 2.72292041e-01 3.12200137e-01
+  3.11726643e-01 2.96499435e-01 2.95758502e-01 2.83225209e-01
+  2.75073489e-01 2.70272540e-01 2.75708517e-01 9.92506575e-05]
+ [2.46153846e-01 1.00000000e+00 2.73488929e-01 3.12200137e-01
+  3.11840163e-01 2.96580094e-01 2.95834925e-01 2.83225209e-01
+  2.75073489e-01 2.70272540e-01 2.75670780e-01 4.96253288e-04]
+ [2.15384615e-01 1.00000000e+00 2.73488929e-01 3.12542838e-01
+  3.11840163e-01 2.96499435e-01 2.95834925e-01 2.83225209e-01
+  2.75073489e-01 2.70272540e-01 2.76538737e-01 2.82864374e-03]
+ [1.23076923e-01 1.00000000e+00 2.72890485e-01 3.12028787e-01
+  3.11726643e-01 2.96418777e-01 2.95605655e-01 2.83163423e-01
+  2.75073489e-01 2.70272540e-01 2.76123627e-01 2.87826907e-03]]
+#+end_example
+
+Perform K-Means Clustering. We will test for many *k* values. Then plot the Elbow curve graph.
+
+#+begin_src python :results output file :wrap org
+file = "../resources/elbow1.png"
+sse = {}
+K = range(1,10)
+for k in K:
+    kmeanmodel = KMeans(n_clusters=k).fit(X_scaled)
+    sse[k]= kmeanmodel.inertia_
+
+# Plot
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.plot(list(sse.keys()), list(sse.values()))
+ax.set_xlabel('k')
+ax.set_ylabel('SSE')
+ax.set_title('Elbow Method')
+fig.savefig(file)
+print(file)
+#+end_src
+
+#+RESULTS[92eaa735e9f523c08e2abb0e539615588382041a]:
+#+begin_org
+[[file:../resources/elbow1.png]]
+#+end_org
+
+** Chose Number of Clusters and Predict
+:PROPERTIES:
+:CUSTOM_ID: chose-number-of-clusters-and-predict
+:END:
+
+Create a KMeans model with 3 clusters. Then we calculate the predicted values and add them to the dataframe.
+
+#+begin_src python
+model = KMeans(n_clusters=3, random_state=42).fit(X_scaled)
+
+y_pred = model.predict(X_scaled)
+df_y = pd.DataFrame(y_pred, columns=['Cluster'])
+combined = df.join(df_y, how='inner')
+print(combined.head())
+#+end_src
+
+#+RESULTS[c851cacabb92775c8537ee7407cfa08ac6613bd9]:
+#+begin_example
+   Age  M/F     5K     10K     15K     20K    Half     25K     30K     35K     40K   Pace  Official Time  Cluster
+0   30    1  911.0  1821.0  2748.0  3676.0  3869.0  4583.0  5521.0  6436.0  7305.0  293.0         7677.0        2
+1   29    1  910.0  1822.0  2746.0  3676.0  3870.0  4584.0  5521.0  6436.0  7306.0  293.0         7679.0        2
+2   34    1  914.0  1822.0  2747.0  3677.0  3871.0  4584.0  5521.0  6436.0  7305.0  294.0         7687.0        2
+3   32    1  914.0  1824.0  2747.0  3676.0  3871.0  4584.0  5521.0  6436.0  7328.0  295.0         7734.0        2
+4   26    1  912.0  1821.0  2746.0  3675.0  3868.0  4583.0  5521.0  6436.0  7317.0  296.0         7735.0        2
+#+end_example
+
+** Visualize the Results
+:PROPERTIES:
+:CUSTOM_ID: visualize-the-results
+:END:
+
+Then we can create a boxplot to visualize the data for different clusters.
+
+#+begin_src python :results file :wrap org
+file = "../resources/boxplot1.png"
+
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.boxplot([combined["Official Time"][combined['Cluster'] == c] for c in combined['Cluster'].unique()])
+ax.set_ylabel('Official Time')
+ax.set_title('Elbow Method')
+fig.savefig(file)
+print(file)
+#+end_src
+
+#+RESULTS[25c76df6855e24c07fa1bb083bc1d30079258bd6]:
+#+begin_org
+[[file:../resources/boxplot1.png]]
+#+end_org
+
+#+begin_src python
+print(combined.groupby(['M/F','Cluster']).describe()['Age'])
+#+end_src
+
+#+RESULTS[225e06d574b678e9bca7417d7e2ef69d7595ef16]:
+#+begin_example
+               count       mean        std   min   25%   50%   75%   max
+M/F Cluster
+0   1        11981.0  40.545197  10.962787  18.0  31.0  40.0  48.0  80.0
+1   0         5144.0  51.623250  11.951811  18.0  44.0  54.0  60.0  83.0
+    2         9522.0  40.872821   9.594296  18.0  34.0  41.0  48.0  71.0
+#+end_example
+
+** Organize the Results
+:PROPERTIES:
+:CUSTOM_ID: organize-the-results
+:END:
+
+Then we re-assign the labels via a function. We create a function that takes in gender and age and assigns an age group based on the following break points for each gender:
+
+- The lowest 1st quartile
+- Each median
+- The highest 3rd quartile
+
+Then we apply the custom age group to the original data frame and save it to the column 'Age Group'.
+
+#+begin_src python
+def age_group(gender, age):
+    if gender == 0:
+        if age < 29:
+            return 0
+        elif age < 36:
+            return 1
+        elif age < 41:
+            return 2
+        elif age < 45:
+            return 3
+        elif age < 51:
+            return 4
+        else:
+            return 5
+    if gender == 1:
+        if age < 33:
+            return 0
+        elif age < 40:
+            return 1
+        elif age < 48:
+            return 2
+        elif age < 53:
+            return 3
+        elif age < 60:
+            return 4
+        else:
+            return 5
+df['Age Group'] = df.apply(lambda row: age_group(row['M/F'], row['Age']), axis=1)
+print(df.head())
+#+end_src
+
+#+RESULTS[13864bfe2e3decf871e7a690aaed7cdddf4a6e25]:
+#+begin_example
+   Age  M/F     5K     10K     15K     20K    Half     25K     30K     35K     40K   Pace  Official Time  Age Group
+0   30    1  911.0  1821.0  2748.0  3676.0  3869.0  4583.0  5521.0  6436.0  7305.0  293.0         7677.0          0
+1   29    1  910.0  1822.0  2746.0  3676.0  3870.0  4584.0  5521.0  6436.0  7306.0  293.0         7679.0          0
+2   34    1  914.0  1822.0  2747.0  3677.0  3871.0  4584.0  5521.0  6436.0  7305.0  294.0         7687.0          1
+3   32    1  914.0  1824.0  2747.0  3676.0  3871.0  4584.0  5521.0  6436.0  7328.0  295.0         7734.0          0
+4   26    1  912.0  1821.0  2746.0  3675.0  3868.0  4583.0  5521.0  6436.0  7317.0  296.0         7735.0          0
+#+end_example
+
+
+* Principal Component Analysis
+:PROPERTIES:
+:CUSTOM_ID: principal-component-analysis
+:END:
+
+PCA reduces the dataset into a smaller set of dimensions called *principal components*. The objective is to have a very well represented set of components for our feature set, even if it's hard for us to understand why this is.
+
+The principal components don't look a lot like the original dataset. We will always lose data but we want to keep as much information as possible. If we lose too much data, we risk losing an important part of the variation we are looking at.
+
+The *explained variance ratio* tells us how much of each component captures the variance of the dimensions.
+
+This is an iterative process where we can go back to increase the number of components to see if we can capture more data or if we can work with the current number of components. We normally want to aim for over 90 percent of the variance ratio.
+
+* Example of PCA
+:PROPERTIES:
+:CUSTOM_ID: example-of-pca
+:END:
+
+** Load the Data
+:PROPERTIES:
+:CUSTOM_ID: load-the-data
+:END:
+
+We want to reduce the dimensions of the consumers shopping dataset from 4 to 2 featues. Then we can use K-means for segmentation.
+
+#+begin_src python
+import pandas as pd
+from pathlib import Path
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+
+file_path = Path("../resources/shopping_data_cleaned.csv")
+df = pd.read_csv(file_path)
+print(df.head())
+#+end_src
+
+#+RESULTS[cc90c88b2f110cddd405777d15ef1d132d48c885]:
+#+begin_example
+   Previous Shopper  Age  Annual Income  Spending Score (1-100)
+0                 1   19           15.0                      39
+1                 1   21           15.0                      81
+2                 0   20           16.0                       6
+3                 0   23           16.0                      77
+4                 0   31           17.0                      40
+#+end_example
+
+** Standarize / Scale the data
+:PROPERTIES:
+:CUSTOM_ID: standarize-scale-the-data
+:END:
+
+#+begin_src python
+df_scaled = StandardScaler().fit_transform(df)
+print(df_scaled[0:5])
+#+end_src
+
+#+RESULTS[ea31f9f6b98cccd9994c63667c703b82e6607e79]:
+#+begin_example
+[[ 1.12815215 -1.42456879 -1.73899919 -0.43480148]
+ [ 1.12815215 -1.28103541 -1.73899919  1.19570407]
+ [-0.88640526 -1.3528021  -1.70082976 -1.71591298]
+ [-0.88640526 -1.13750203 -1.70082976  1.04041783]
+ [-0.88640526 -0.56336851 -1.66266033 -0.39597992]]
+#+end_example
+
+** Use the PCA
+:PROPERTIES:
+:CUSTOM_ID: use-the-pca
+:END:
+
+Then we transform the PCA data to a dataframe and we take a look at the explained variance ratio.
+
+#+begin_src python
+pca = PCA(n_components=2)
+data = pca.fit_transform(df_scaled)
+
+df_pca = pd.DataFrame(
+    data=data,
+    columns=["principal component 1", "principal component 2"]
+)
+print(df_pca.head())
+print(pca.explained_variance_ratio_)
+#+end_src
+
+#+RESULTS[f8502ba8ea4d566b710ee87749d03de13853af1b]:
+#+begin_example
+   principal component 1  principal component 2
+0              -0.406383              -0.520714
+1              -1.427673              -0.367310
+2               0.050761              -1.894068
+3              -1.694513              -1.631908
+4              -0.313108              -1.810483
+[0.33690046 0.26230645]
+#+end_example
+
+We have a total of 60% of the information from the two components. We will see wether increasing the number of components will incrase it.
+
+#+begin_src python
+pca = PCA(n_components=3)
+data = pca.fit_transform(df_scaled)
+
+df_pca = pd.DataFrame(
+    data=data,
+    columns=["PC1", "PC2", "PC3"]
+)
+print(df_pca.head())
+print(pca.explained_variance_ratio_)
+#+end_src
+
+#+RESULTS[7d1cfbed178a99be3d834690b9a101199856739f]:
+#+begin_example
+        PC1       PC2       PC3
+0 -0.406383 -0.520714 -2.072527
+1 -1.427673 -0.367310 -2.277644
+2  0.050761 -1.894068 -0.367375
+3 -1.694513 -1.631908 -0.717467
+4 -0.313108 -1.810483 -0.426460
+[0.33690046 0.26230645 0.23260639]
+#+end_example
+
+We get a total of 83 percent of the information. This is good enough to continue.
+
+** K-means clustering
+:PROPERTIES:
+:CUSTOM_ID: k-means-clustering
+:END:
+
+Now we can use a K-means clustering algorithm.
+
+#+begin_src python
+model = KMeans(n_clusters=k, random_state=0).fit(df_pca)
+
+predictions = model.predict(df_pca)
+df_pca["class"] = model.labels_
+print(df_pca.head())
+#+end_src
+
+#+RESULTS[7c92a6226152f6c8e1122cc7a1f359a64ddb3a6d]:
+#+begin_example
+        PC1       PC2       PC3  class
+0 -0.406383 -0.520714 -2.072527      4
+1 -1.427673 -0.367310 -2.277644      4
+2  0.050761 -1.894068 -0.367375      2
+3 -1.694513 -1.631908 -0.717467      8
+4 -0.313108 -1.810483 -0.426460      8
+#+end_example
+
+** Visualize the Results
+:PROPERTIES:
+:CUSTOM_ID: visualize-the-results
+:END:
+
+We will get a 3D plane in this case with all the new features spread accross it.
+
+#+begin_src python :eval no
+import plotly.express as px
+fig = px.scatter_3d(
+    df_pca,
+    x="PC3",
+    y="PC2",
+    z="PC1",
+    color="class",
+    symbol="class",
+    width=800,
+)
+fig.update_layout(legend=dict(x=0, y=1))
+fig.show()
+#+end_src
+
+#+attr_html: :width 500px
+[[../resources/pca1.png]]
+
+#+attr_html: :width 500px
+[[../resources/pca2.png]]
+
+* PCA Example 2
+:PROPERTIES:
+:CUSTOM_ID: pca-example-2
+:END:
+
+We will go back to the last K-means example and use that data to apply PCA to it.
+
+** Clean the data
+:PROPERTIES:
+:CUSTOM_ID: clean-the-data
+:END:
+
+We will get rid of the columns we are not interested in.
+
+#+begin_src python
+X = df.drop(["Age", "Pace"], axis=1)
+X_scaled = MinMaxScaler().fit_transform(X)
+print(X_scaled[:5])
+#+end_src
+
+#+RESULTS[d9b8e322c0f75312b2728d1d476d21f7a6e3180b]:
+#+begin_example
+[[1.00000000e+00 2.72591263e-01 3.12028787e-01 3.11953684e-01
+  2.96499435e-01 2.95682079e-01 2.83163423e-01 2.75073489e-01
+  2.70272540e-01 2.75670780e-01 0.00000000e+00 0.00000000e+00]
+ [1.00000000e+00 2.72292041e-01 3.12200137e-01 3.11726643e-01
+  2.96499435e-01 2.95758502e-01 2.83225209e-01 2.75073489e-01
+  2.70272540e-01 2.75708517e-01 9.92506575e-05 0.00000000e+00]
+ [1.00000000e+00 2.73488929e-01 3.12200137e-01 3.11840163e-01
+  2.96580094e-01 2.95834925e-01 2.83225209e-01 2.75073489e-01
+  2.70272540e-01 2.75670780e-01 4.96253288e-04 2.00000000e-01]
+ [1.00000000e+00 2.73488929e-01 3.12542838e-01 3.11840163e-01
+  2.96499435e-01 2.95834925e-01 2.83225209e-01 2.75073489e-01
+  2.70272540e-01 2.76538737e-01 2.82864374e-03 0.00000000e+00]
+ [1.00000000e+00 2.72890485e-01 3.12028787e-01 3.11726643e-01
+  2.96418777e-01 2.95605655e-01 2.83163423e-01 2.75073489e-01
+  2.70272540e-01 2.76123627e-01 2.87826907e-03 0.00000000e+00]]
+#+end_example
+
+We can observe that we currently have 12 features. So we are going to use PCA to simplify this.
+
+** Applying PCA
+:PROPERTIES:
+:CUSTOM_ID: applying-pca
+:END:
+
+We will use two dimensions to start with.
+
+#+begin_src python
+pca = PCA(n_components=2)
+pca.fit(X_scaled)
+X_pca = pca.transform(X_scaled)
+print(pca.explained_variance_ratio_)
+#+end_src
+
+#+RESULTS[8e9a2f026ec7dd97bc0a389b935b3413e7ce27b6]:
+#+begin_example
+[0.55211069 0.26751402]
+#+end_example
+
+Note that the first dimension explains 55 percent of all twelve dimensions. This is because most of our features are highly correlated, in this case, most are related to speed and endurance of the runners so even if these dimensions don't relate specifically to those two labels, we can use them for creating our clusters.
+
+** Visualize PCA
+:PROPERTIES:
+:CUSTOM_ID: visualize-pca
+:END:
+
+#+begin_src python :eval no
+import hvplot.pandas
+import hvplot
+
+df_pca = pd.DataFrame(X_pca, columns=["PC1", "PC2"])
+plot = df_pca.hvplot.scatter(x="PC1", y="PC2")
+hvplot.save(plot, '../resources/pca3.html')
+#+end_src
+
+#+attr_html: :width 600px
+[[../resources/pca3.png]]
+
+** Visualize Elbow Curve
+:PROPERTIES:
+:CUSTOM_ID: visualize-elbow-curve
+:END:
+
+We will fit the PCA data to the KMeans model now, instead of the complete set of dimensions from before.
+
+#+begin_src python :results file :wrap org
+file = "../resources/elbow2.png"
+sse = {}
+K = range(1,10)
+for k in K:
+    kmeanmodel = KMeans(n_clusters=k).fit(X_pca)
+    sse[k]= kmeanmodel.inertia_
+
+# Plot
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.plot(list(sse.keys()), list(sse.values()))
+ax.set_xlabel('k')
+ax.set_ylabel('SSE')
+ax.set_title('Elbow Method')
+fig.savefig(file)
+print(file)
+#+end_src
+
+#+RESULTS[a2be6733051c0b13299bb7fcfb53db7f071171eb]:
+#+begin_org
+[[file:../resources/elbow2.png]]
+#+end_org
+
+** Select Amount of Clusters and build Model
+:PROPERTIES:
+:CUSTOM_ID: select-amount-of-clusters-and-build-model
+:END:
+
+#+begin_src python
+model = KMeans(n_clusters=4, random_state=42).fit(X_pca)
+y_pred = model.fit_predict(X_pca)
+print(y_pred[:10])
+#+end_src
+
+#+RESULTS[a407f60981683681bd74f8dbc20138bba85c1705]:
+#+begin_example
+[1 1 1 1 1 1 1 1 1 1]
+#+end_example
+
+** Visualize the Results
+:PROPERTIES:
+:CUSTOM_ID: visualize-the-results
+:END:
+
+#+begin_src python :eval no
+df_pca['cluster'] = y_pred
+
+plot = df_pca.hvplot.scatter(x="PC1", y="PC2", by="cluster")
+hvplot.save(plot, '../resources/pca4.html')
+#+end_src
+
+#+attr_html: :width 500px
+[[../resources/pca4.png]]
+
+We can observe that we have two cuts in our two dimensions, a negative correlation between PCA1 and PCA2. Then in color we have our clusters very defined.
+
+#+begin_src python
+df_y = pd.DataFrame(y_pred, columns=['Cluster'])
+combined = df.join(df_y, how='inner')
+print(combined.head())
+#+end_src
+
+#+RESULTS[0863790a9457beb617a91dfe20bd4e42915fb17e]:
+#+begin_example
+   Age  M/F     5K     10K     15K     20K    Half     25K     30K     35K     40K   Pace  Official Time  Age Group  Cluster
+0   30    1  911.0  1821.0  2748.0  3676.0  3869.0  4583.0  5521.0  6436.0  7305.0  293.0         7677.0          0        1
+1   29    1  910.0  1822.0  2746.0  3676.0  3870.0  4584.0  5521.0  6436.0  7306.0  293.0         7679.0          0        1
+2   34    1  914.0  1822.0  2747.0  3677.0  3871.0  4584.0  5521.0  6436.0  7305.0  294.0         7687.0          1        1
+3   32    1  914.0  1824.0  2747.0  3676.0  3871.0  4584.0  5521.0  6436.0  7328.0  295.0         7734.0          0        1
+4   26    1  912.0  1821.0  2746.0  3675.0  3868.0  4583.0  5521.0  6436.0  7317.0  296.0         7735.0          0        1
+#+end_example
+
+
+#+begin_src python :results file :wrap org
+file = "../resources/boxplot3.png"
+
+combined.boxplot(['Pace'], by=['M/F', 'Cluster'])
+
+plt.savefig(file)
+print(file)
+#+end_src
+
+#+RESULTS[62473dbfa61c4f4b7764e5424935d387b7c8ca92]:
+#+begin_org
+[[file:../resources/boxplot3.png]]
+#+end_org
+
+There seems to be a pattern. The pattern is the same as the cut we saw in the scatter plot. So clusters 1, 3 seem to have a significantly higher pace, while clusters 0, 2 have a significantly lower pace.
+
+** Display summary statistics
+:PROPERTIES:
+:CUSTOM_ID: display-summary-statistics
+:END:
+
+We can take a look at the summary statistics to try to find a way to suggest a cut for the basis so we can create categories for the marathon.
+
+#+begin_src python
+print(combined.groupby(['M/F', 'Cluster']).describe()['Pace'])
+#+end_src
+
+#+RESULTS[73f77f698a6b4c75a099623ba9610a34dd8e5946]:
+#+begin_example
+              count        mean        std    min    25%    50%    75%     max
+M/F Cluster
+0   0        5695.0  598.411414  88.711040  402.0  532.0  578.0  648.0  1021.0
+    3        6286.0  528.745625  85.410255  329.0  473.0  506.0  567.0   863.0
+1   1        8289.0  463.627337  81.862134  293.0  409.0  443.0  497.0   848.0
+    2        6377.0  572.265799  99.287868  349.0  494.0  551.0  633.0  1062.0
+#+end_example
+
+Setting a value of 525 would be a good place to split the first quartile of the fast to the thrid quartile of the slowest. So we find where of the two categories come close and then declare a line where we make a decision to separate them.
+
+*Note* that we don't actively try to understand the meaning of PCA dimensions, we make a decision at the end of the analysis, after we already made the prediction (clustering) with our model.
+
+* Hierarchical Clustering
+:PROPERTIES:
+:CUSTOM_ID: hierarchical-clustering
+:END:
+
+Hierarchical Clustering builds a hierarchy of connections based on distance of the clusters. The dendogram allows us to read this hierarchy.
+
+** Dendograms
+:PROPERTIES:
+:CUSTOM_ID: dendograms
+:END:
+
+Dendograms are tree-like structures where each cluster starts at the bottom.
+
+#+attr_html: :width 500px
+[[../resources/dendogram.png]]
+
+Each dendrite ending at the bottom is a cluster. For each cluster, the algorithm will find the closest neighbor and it will put it beside it, then connects them with a dendrite that goes as high as the distance between the clusters. So the lower the connection is positioned in the dendogram, the closer they are in the distribution. This replicates with the subsequent connections in the dendogram.
+
+For this hierarchy to be formed, we need to have the data normalized. We will use the =dendogram= from =scipy= to create these hierachies.
+
+There are different types of linkage methods.
+
+1. Single: The difference between two clusters is defined by the closest distance between two clusters.
+2. Complete: The difference between two clusters is defined by the farthest distance between two cluters.
+3. Ward: This method is based on the squared euclidean distance between clusters. It's the method often used as default.
+
+* Hierarchical Cluster Example
+:PROPERTIES:
+:CUSTOM_ID: hierarchical-cluster-example
+:END:
+
+** Imports
+:PROPERTIES:
+:CUSTOM_ID: imports
+:END:
+
+#+begin_src python
+from sklearn.preprocessing import normalize
+from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.cluster import AgglomerativeClustering
+import matplotlib.pyplot as plt
+from pathlib import Path
+import pandas as pd
+import numpy as np
+#+end_src
+
+#+RESULTS[7711a966760d2524ac9b81e743285f761d748c10]:
+#+begin_example
+#+end_example
+
+** Load and Normalize the Data
+:PROPERTIES:
+:CUSTOM_ID: load-and-normalize-the-data
+:END:
+
+#+begin_src python
+file = Path('../resources/wholesale_customers.csv')
+df = pd.read_csv(file)
+print(df.sample(5))
+#+end_src
+
+#+RESULTS[993f8c92fa305475874e174593ba46bb3c57504c]:
+#+begin_example
+     Channel  Region  Fresh   Milk  Grocery  Frozen  Detergents_Paper  Delicassen
+253        1       1  29526   7961    16966     432               363        1391
+68         1       3   2446   7260     3993    5870               788        3095
+276        1       3  27901   3749     6964    4479               603        2503
+359        1       3    796   5878     2109     340               232         776
+46         2       3   3103  14069    21955    1668              6792        1452
+#+end_example
+
+#+begin_src python
+normalized = normalize(df)
+print(normalized[:5])
+#+end_src
+
+#+RESULTS[22fb60ebf689920f4dcc8d2058df1b6f3a785c3d]:
+#+begin_example
+[[1.11821406e-04 1.67732109e-04 7.08332695e-01 5.39873747e-01
+  4.22740825e-01 1.19648904e-02 1.49505220e-01 7.48085205e-02]
+ [1.25321880e-04 1.87982820e-04 4.42198253e-01 6.14703821e-01
+  5.99539873e-01 1.10408576e-01 2.06342475e-01 1.11285829e-01]
+ [1.24839188e-04 1.87258782e-04 3.96551681e-01 5.49791784e-01
+  4.79632161e-01 1.50119124e-01 2.19467293e-01 4.89619296e-01]
+ [6.45937822e-05 1.93781347e-04 8.56836521e-01 7.72541635e-02
+  2.72650355e-01 4.13658581e-01 3.27490476e-02 1.15493683e-01]
+ [7.91877886e-05 1.18781683e-04 8.95415919e-01 2.14202968e-01
+  2.84996851e-01 1.55010096e-01 7.03583502e-02 2.05294342e-01]]
+#+end_example
+
+** Create the Dendogram
+:PROPERTIES:
+:CUSTOM_ID: create-the-dendogram
+:END:
+
+We will create our mergings first, then use the =dendrogram= function from =scipy= to create the dendogram.
+
+#+begin_src python :results file :wrap org
+file = "../resources/dendrogram1.png"
+
+mergings = linkage(normalized, method='ward')
+plt.figure(figsize=(10, 4))
+
+dendrogram(
+    mergings,
+    leaf_rotation=90,
+    leaf_font_size=5
+)
+plt.savefig(file)
+
+print(file)
+#+end_src
+
+#+RESULTS[7dcca290cb9151890e299fcb763d5428d290ed67]:
+#+begin_org
+[[file:../resources/dendrogram1.png]]
+#+end_org
+
+*Note* that we have way too many cases which results in way too many branches. So we must map everything into 4 clusters to get a better visualization result.
+
+** Remap Observations into Clusters
+:PROPERTIES:
+:CUSTOM_ID: remap-observations-into-clusters
+:END:
+
+#+begin_src python
+df2 = pd.DataFrame(normalized)
+df2.columns = df.columns
+
+model = AgglomerativeClustering(
+    n_clusters=4,
+    affinity='euclidean',
+    linkage='ward'
+)
+labels = model.fit_predict(df)
+print(labels[:10])
+#+end_src
+
+#+RESULTS[60b63d4341d65549715e63d01e8c492aa5825990]:
+#+begin_example
+[2 2 2 2 3 2 2 2 2 0]
+#+end_example
+
+** Run the Dendogram Again
+:PROPERTIES:
+:CUSTOM_ID: run-the-dendogram-again
+:END:
+
+We will use the =labels= argument of the dendrogram function and pass the =labels= as a numpy array.
+
+#+begin_src python :results file :wrap org
+file = "../resources/dendrogram2.png"
+
+mergings = linkage(normalized, method='ward')
+
+plt.figure(figsize=(10, 4))
+dendrogram(
+    mergings,
+    labels=np.array(labels),
+    leaf_rotation=90,
+    leaf_font_size=5
+)
+plt.savefig(file)
+
+print(file)
+#+end_src
+
+#+RESULTS[e572379c428afd319319c13309d3f0069c3f2e93]:
+#+begin_org
+[[file:../resources/dendrogram2.png]]
+#+end_org
+
+We can see a few groups from the dendrogram but we can also try to visualize it in a 2d plane as we've before, then find similarities between them.
+
+#+begin_src python :results file :wrap org
+file = "../resources/dendro_clusters2d.png"
+
+plt.figure(figsize=(5, 4))
+
+plt.scatter(df2['Grocery'], df2['Fresh'], c=labels)
+
+plt.savefig(file)
+print(file)
+#+end_src
+
+#+RESULTS[7103867fe807e7e5bc29e79b2c1f3080cdd304b4]:
+#+begin_org
+[[file:../resources/dendro_clusters2d.png]]
+#+end_org

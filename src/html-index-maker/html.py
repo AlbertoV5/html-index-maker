@@ -4,11 +4,14 @@ from pathlib import Path
 import re
 
 
-def scrape(driver: Chrome, htmlfile: Path) -> dict:
+def scrape_html(driver: Chrome, htmlfile: Path) -> dict:
     """Returns a dictionary from the scraped htmlfile."""
     driver.get(f"file://{htmlfile}")
     if driver.page_source is not None:
-        return {"file": str(htmlfile), "headers": get_headers(driver.page_source)}
+        return {
+            "file": str(htmlfile.relative_to(Path.cwd())),
+            "headers": get_headers(driver.page_source),
+        }
 
 
 def get_headers(page_source: str) -> dict:

@@ -1,6 +1,201 @@
-[
+let indexData = [
   {
-    "file": "resources/17/ml.html",
+    "file": "resources/unsupervised-ml.html",
+    "headers": [
+      {
+        "tag": "h2",
+        "id": "unsupervised-machine-learning",
+        "text": "1. Unsupervised Machine Learning"
+      },
+      {
+        "tag": "h3",
+        "id": "clustering",
+        "text": "1.1. Clustering"
+      },
+      {
+        "tag": "h2",
+        "id": "data-preparation",
+        "text": "2. Data preparation"
+      },
+      {
+        "tag": "h3",
+        "id": "transformation-example",
+        "text": "2.1. Transformation Example"
+      },
+      {
+        "tag": "h3",
+        "id": "data-transformation-example-2",
+        "text": "2.2. Data Transformation Example 2"
+      },
+      {
+        "tag": "h2",
+        "id": "k-means-algorithm",
+        "text": "3. K-Means Algorithm"
+      },
+      {
+        "tag": "h3",
+        "id": "the-elbow-curve",
+        "text": "3.1. The Elbow Curve"
+      },
+      {
+        "tag": "h2",
+        "id": "k-cluster-example",
+        "text": "4. K-Cluster Example"
+      },
+      {
+        "tag": "h3",
+        "id": "load-the-data",
+        "text": "4.1. Load the Data"
+      },
+      {
+        "tag": "h3",
+        "id": "convert-time-to-time-delta",
+        "text": "4.2. Convert time to Time Delta"
+      },
+      {
+        "tag": "h3",
+        "id": "clean-the-data",
+        "text": "4.3. Clean the data"
+      },
+      {
+        "tag": "h3",
+        "id": "creating-a-training-set",
+        "text": "4.4. Creating a Training Set"
+      },
+      {
+        "tag": "h3",
+        "id": "chose-number-of-clusters-and-predict",
+        "text": "4.5. Chose Number of Clusters and Predict"
+      },
+      {
+        "tag": "h3",
+        "id": "visualize-the-results",
+        "text": "4.6. Visualize the Results"
+      },
+      {
+        "tag": "h3",
+        "id": "organize-the-results",
+        "text": "4.7. Organize the Results"
+      },
+      {
+        "tag": "h2",
+        "id": "principal-component-analysis",
+        "text": "5. Principal Component Analysis"
+      },
+      {
+        "tag": "h2",
+        "id": "example-of-pca",
+        "text": "6. Example of PCA"
+      },
+      {
+        "tag": "h3",
+        "id": "load-the-data",
+        "text": "6.1. Load the Data"
+      },
+      {
+        "tag": "h3",
+        "id": "standarize-scale-the-data",
+        "text": "6.2. Standarize / Scale the data"
+      },
+      {
+        "tag": "h3",
+        "id": "use-the-pca",
+        "text": "6.3. Use the PCA"
+      },
+      {
+        "tag": "h3",
+        "id": "k-means-clustering",
+        "text": "6.4. K-means clustering"
+      },
+      {
+        "tag": "h3",
+        "id": "visualize-the-results",
+        "text": "6.5. Visualize the Results"
+      },
+      {
+        "tag": "h2",
+        "id": "pca-example-2",
+        "text": "7. PCA Example 2"
+      },
+      {
+        "tag": "h3",
+        "id": "clean-the-data",
+        "text": "7.1. Clean the data"
+      },
+      {
+        "tag": "h3",
+        "id": "applying-pca",
+        "text": "7.2. Applying PCA"
+      },
+      {
+        "tag": "h3",
+        "id": "visualize-pca",
+        "text": "7.3. Visualize PCA"
+      },
+      {
+        "tag": "h3",
+        "id": "visualize-elbow-curve",
+        "text": "7.4. Visualize Elbow Curve"
+      },
+      {
+        "tag": "h3",
+        "id": "select-amount-of-clusters-and-build-model",
+        "text": "7.5. Select Amount of Clusters and build Model"
+      },
+      {
+        "tag": "h3",
+        "id": "visualize-the-results",
+        "text": "7.6. Visualize the Results"
+      },
+      {
+        "tag": "h3",
+        "id": "display-summary-statistics",
+        "text": "7.7. Display summary statistics"
+      },
+      {
+        "tag": "h2",
+        "id": "hierarchical-clustering",
+        "text": "8. Hierarchical Clustering"
+      },
+      {
+        "tag": "h3",
+        "id": "dendograms",
+        "text": "8.1. Dendograms"
+      },
+      {
+        "tag": "h2",
+        "id": "hierarchical-cluster-example",
+        "text": "9. Hierarchical Cluster Example"
+      },
+      {
+        "tag": "h3",
+        "id": "imports",
+        "text": "9.1. Imports"
+      },
+      {
+        "tag": "h3",
+        "id": "load-and-normalize-the-data",
+        "text": "9.2. Load and Normalize the Data"
+      },
+      {
+        "tag": "h3",
+        "id": "create-the-dendogram",
+        "text": "9.3. Create the Dendogram"
+      },
+      {
+        "tag": "h3",
+        "id": "remap-observations-into-clusters",
+        "text": "9.4. Remap Observations into Clusters"
+      },
+      {
+        "tag": "h3",
+        "id": "run-the-dendogram-again",
+        "text": "9.5. Run the Dendogram Again"
+      }
+    ]
+  },
+  {
+    "file": "resources/ml.html",
     "headers": [
       {
         "tag": "h2",
@@ -285,202 +480,7 @@
     ]
   },
   {
-    "file": "resources/18/unsupervised-ml.html",
-    "headers": [
-      {
-        "tag": "h2",
-        "id": "unsupervised-machine-learning",
-        "text": "1. Unsupervised Machine Learning"
-      },
-      {
-        "tag": "h3",
-        "id": "clustering",
-        "text": "1.1. Clustering"
-      },
-      {
-        "tag": "h2",
-        "id": "data-preparation",
-        "text": "2. Data preparation"
-      },
-      {
-        "tag": "h3",
-        "id": "transformation-example",
-        "text": "2.1. Transformation Example"
-      },
-      {
-        "tag": "h3",
-        "id": "data-transformation-example-2",
-        "text": "2.2. Data Transformation Example 2"
-      },
-      {
-        "tag": "h2",
-        "id": "k-means-algorithm",
-        "text": "3. K-Means Algorithm"
-      },
-      {
-        "tag": "h3",
-        "id": "the-elbow-curve",
-        "text": "3.1. The Elbow Curve"
-      },
-      {
-        "tag": "h2",
-        "id": "k-cluster-example",
-        "text": "4. K-Cluster Example"
-      },
-      {
-        "tag": "h3",
-        "id": "load-the-data",
-        "text": "4.1. Load the Data"
-      },
-      {
-        "tag": "h3",
-        "id": "convert-time-to-time-delta",
-        "text": "4.2. Convert time to Time Delta"
-      },
-      {
-        "tag": "h3",
-        "id": "clean-the-data",
-        "text": "4.3. Clean the data"
-      },
-      {
-        "tag": "h3",
-        "id": "creating-a-training-set",
-        "text": "4.4. Creating a Training Set"
-      },
-      {
-        "tag": "h3",
-        "id": "chose-number-of-clusters-and-predict",
-        "text": "4.5. Chose Number of Clusters and Predict"
-      },
-      {
-        "tag": "h3",
-        "id": "visualize-the-results",
-        "text": "4.6. Visualize the Results"
-      },
-      {
-        "tag": "h3",
-        "id": "organize-the-results",
-        "text": "4.7. Organize the Results"
-      },
-      {
-        "tag": "h2",
-        "id": "principal-component-analysis",
-        "text": "5. Principal Component Analysis"
-      },
-      {
-        "tag": "h2",
-        "id": "example-of-pca",
-        "text": "6. Example of PCA"
-      },
-      {
-        "tag": "h3",
-        "id": "load-the-data",
-        "text": "6.1. Load the Data"
-      },
-      {
-        "tag": "h3",
-        "id": "standarize-scale-the-data",
-        "text": "6.2. Standarize / Scale the data"
-      },
-      {
-        "tag": "h3",
-        "id": "use-the-pca",
-        "text": "6.3. Use the PCA"
-      },
-      {
-        "tag": "h3",
-        "id": "k-means-clustering",
-        "text": "6.4. K-means clustering"
-      },
-      {
-        "tag": "h3",
-        "id": "visualize-the-results",
-        "text": "6.5. Visualize the Results"
-      },
-      {
-        "tag": "h2",
-        "id": "pca-example-2",
-        "text": "7. PCA Example 2"
-      },
-      {
-        "tag": "h3",
-        "id": "clean-the-data",
-        "text": "7.1. Clean the data"
-      },
-      {
-        "tag": "h3",
-        "id": "applying-pca",
-        "text": "7.2. Applying PCA"
-      },
-      {
-        "tag": "h3",
-        "id": "visualize-pca",
-        "text": "7.3. Visualize PCA"
-      },
-      {
-        "tag": "h3",
-        "id": "visualize-elbow-curve",
-        "text": "7.4. Visualize Elbow Curve"
-      },
-      {
-        "tag": "h3",
-        "id": "select-amount-of-clusters-and-build-model",
-        "text": "7.5. Select Amount of Clusters and build Model"
-      },
-      {
-        "tag": "h3",
-        "id": "visualize-the-results",
-        "text": "7.6. Visualize the Results"
-      },
-      {
-        "tag": "h3",
-        "id": "display-summary-statistics",
-        "text": "7.7. Display summary statistics"
-      },
-      {
-        "tag": "h2",
-        "id": "hierarchical-clustering",
-        "text": "8. Hierarchical Clustering"
-      },
-      {
-        "tag": "h3",
-        "id": "dendograms",
-        "text": "8.1. Dendograms"
-      },
-      {
-        "tag": "h2",
-        "id": "hierarchical-cluster-example",
-        "text": "9. Hierarchical Cluster Example"
-      },
-      {
-        "tag": "h3",
-        "id": "imports",
-        "text": "9.1. Imports"
-      },
-      {
-        "tag": "h3",
-        "id": "load-and-normalize-the-data",
-        "text": "9.2. Load and Normalize the Data"
-      },
-      {
-        "tag": "h3",
-        "id": "create-the-dendogram",
-        "text": "9.3. Create the Dendogram"
-      },
-      {
-        "tag": "h3",
-        "id": "remap-observations-into-clusters",
-        "text": "9.4. Remap Observations into Clusters"
-      },
-      {
-        "tag": "h3",
-        "id": "run-the-dendogram-again",
-        "text": "9.5. Run the Dendogram Again"
-      }
-    ]
-  },
-  {
-    "file": "resources/19/deeplearning.html",
+    "file": "resources/deeplearning.html",
     "headers": [
       {
         "tag": "h2",

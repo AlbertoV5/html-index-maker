@@ -172,6 +172,18 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "orgparse"
+version = "0.3.1"
+description = "orgparse - Emacs org-mode parser in Python"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.extras]
+linting = ["lxml", "mypy", "pytest"]
+testing = ["pytest"]
+
+[[package]]
 name = "outcome"
 version = "1.2.0"
 description = "Capture the outcome of Python function calls."
@@ -471,7 +483,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "1218e2e2065105e2e79a179b2d8231a9cd2fe9ca2b7ae87ef2c61e1e7f886bff"
+content-hash = "3a8de6eeafd5af937061af5951618758847f06db173cf7af1ca7a80017df6428"
 
 [metadata.files]
 async-generator = [
@@ -614,6 +626,10 @@ iniconfig = [
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
+]
+orgparse = [
+    {file = "orgparse-0.3.1-py3-none-any.whl", hash = "sha256:41a8327958d2293e42b1e96c2e935d413693bf9619026f6a941a1e33befaafd4"},
+    {file = "orgparse-0.3.1.tar.gz", hash = "sha256:860e6fbb9a67b742baa792e60f8cc18522e9789c065d26821c02285d5fc104af"},
 ]
 outcome = [
     {file = "outcome-1.2.0-py2.py3-none-any.whl", hash = "sha256:c4ab89a56575d6d38a05aa16daeaa333109c1f96167aba8901ab18b6b5e0f7f5"},

@@ -13,7 +13,12 @@ def test_file():
         "python",
         "-m",
         "html-index-maker",
-        "./resources/ml.html",
+        "-i",
+        "./resources/17/ml.html",
+        "-o",
+        "./data.json",
+        "-f",
+        ".html",
     ]
     log.debug(command)
     subprocess.run(command)
@@ -40,7 +45,10 @@ def test_directory():
         "python",
         "-m",
         "html-index-maker",
+        "-i",
         "./resources",
+        "-o",
+        "./data.json",
     ]
     log.debug(command)
     subprocess.run(command)
