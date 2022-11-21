@@ -13,6 +13,8 @@ def make_markdown(data: list) -> str:
     result = "# Index\n"
     for file in data:
         index = [0, 0, 0]
+        file_url = Path(file["file"]).with_suffix(".md")
+        result += f"## [{Path(file['file']).stem.capitalize()}]({file_url})\n\n"
         for header in file["headers"]:
             text = header["text"]
             level = "*" * (int(header["tag"].replace("h", "")) - 1)
@@ -21,6 +23,6 @@ def make_markdown(data: list) -> str:
             index[len(level) - 1] += 1
             num = "".join(f"{i}." for i in index[: len(level)])
             # get link text
-            link = f'[{"&nbsp;"*(len(level)-1)*2} {num} {text}]({file["file"]}#{header["id"]})\n\n'
+            link = f'[{"&nbsp;"*(len(level)-1)*2} {num} {text}]({file_url}#{header["id"]})\n\n'
             result += f"{link}"
     return result

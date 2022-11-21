@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "html-index-maker"
-version = "0.1.1"
-description = ""
+version = "0.1.3"
+description = "Scrape local HTML files and generate an index."
 authors = ["AlbertoV5 <58243333+AlbertoV5@users.noreply.github.com>"]
 license = "MIT"
 readme = "README.md"

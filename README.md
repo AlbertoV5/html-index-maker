@@ -24,5 +24,7 @@ This will call the module on the resources directory, look for html files and st
 
 ## Changelog
 
+- 0.1.3 Fixed .md output file, hyperlinks, headings.
+- 0.1.2 Fixed .org missing linebreak.s
 - 0.1.1 Added support for org, js, md, fixes.
 - 0.1.0 Initial Version
